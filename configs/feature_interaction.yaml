@@ -1,0 +1,14 @@
+kind: feature_interaction
+model: gpt2
+seed: 42
+steps: 20
+batch_size: 1
+gradient_accumulation: 4
+sequence_length: 128
+learning_rate: 0.0003
+rank: 3
+alpha: 4.0
+layers: [0]
+projections: [attn.c_proj]
+parameter_difference_vs_lora_percent: 12.5
+output_dir: results/feature_interaction/r3_seed42

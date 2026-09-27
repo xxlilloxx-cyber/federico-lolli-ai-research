@@ -1,0 +1,6 @@
+config,kind,loss,ppl,params,layers,rank,steps,valid
+concentrated_lora_seed42,lora,3.5694336891174316,35.49648541256807,12288,1,8,1000,True
+concentrated_symmetric_quadratic_seed42,symmetric_quadratic,3.4238228797912598,30.686501881865585,12288,1,8,1000,True
+four_distributed_lora_seed42,lora,3.3470702171325684,28.419349032111317,12288,4,2,1000,True
+two_distributed_lora_seed42,lora,3.402294874191284,30.032942849833045,12288,2,4,1000,True
+two_distributed_symmetric_quadratic_seed42,symmetric_quadratic,3.315688133239746,27.54133957650479,12288,2,4,1000,True

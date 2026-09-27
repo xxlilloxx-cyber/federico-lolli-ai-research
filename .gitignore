@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+quadratic-transformer_*.zip
+site-preview/
+results/
+results_depth/
+results_extended/
+results_local_rank/
+results_long_convergence_5000/
+results_multilayer/
+*.pt
+*.pth
+*.ckpt

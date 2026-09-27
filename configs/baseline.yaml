@@ -1,0 +1,11 @@
+kind: baseline
+model: gpt2
+seed: 42
+steps: 20
+batch_size: 1
+gradient_accumulation: 4
+sequence_length: 128
+learning_rate: 0.0003
+layers: [0]
+projections: [attn.c_proj]
+output_dir: results/baseline/seed42

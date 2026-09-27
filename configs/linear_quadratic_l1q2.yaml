@@ -1,0 +1,16 @@
+kind: linear_quadratic
+model: gpt2
+seed: 42
+steps: 20
+batch_size: 1
+gradient_accumulation: 4
+sequence_length: 128
+learning_rate: 0.0003
+rank_l: 1
+rank_q: 2
+alpha_l: 4.0
+alpha_q: 4.0
+layers: [0]
+projections: [attn.c_proj]
+parameter_budget_label: l1_q2_exact_lora_budget
+output_dir: results_extended/linear_quadratic/l1_q2_seed42
