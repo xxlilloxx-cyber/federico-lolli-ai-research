@@ -4,6 +4,12 @@
 **Contact:** xxlilloxx@gmail.com  
 **Publication scope:** Original report text and original figures are CC BY 4.0; source code is MIT-licensed. Third-party models, datasets, libraries, and cited works retain their own terms.
 
+## Data-definition correction for the final 5,000-step study
+
+The historic `summary.json` field named `validation_loss` is the **best recorded validation loss**, not necessarily the value at optimizer step 5,000. Earlier prose and figures mixed this value with final-step curves. The corrected public pipeline exports `long_final_per_seed.csv` and `long_validation_trajectories.csv`: it labels best-recorded and final-step validation separately, inserts the common pre-update step-0 measurement, and plots only fresh validation passes. The true final-step means are LoRA/Symmetric: concentrated 3.3703/3.2831, two-layer 3.2186/3.1876, four-layer 3.1743/3.1925. Held-out test still uses the final step-5,000 checkpoint.
+
+With row-vector convention, the frozen projection is `y_base=xW+b`; the actual LoRA branch is `(alpha/r)(xA)B` and the Symmetric branch is `(alpha/r)(xU)^(⊙2)P`. Thus `Q_j=(alpha/r) sum_k P_kj u_k u_k^T`; rank(Q_j) is at most r, the same directions are shared across outputs, and signed P coefficients mean Q_j need not be positive semidefinite. The final campaigns use alpha=4, giving local branch scales 0.5, 1, and 2 at ranks 8, 4, and 2 respectively.
+
 ## 1. Executive Summary
 
 This project studies whether a frozen Transformer can be adapted more effectively with a low-rank second-order correction than with standard LoRA, when the trainable parameter budget is comparable. The central comparison is deliberately empirical: the experiments do not assume that quadratic adapters are superior. The study progressed from a frozen GPT-2 baseline and short single-layer adapter tests to parameter-matched depth scans, fixed-budget multi-layer placement, local-rank analysis, long 5,000-step training, adapter-only checkpointing, and held-out WikiText-2 evaluation.
