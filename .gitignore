@@ -3,6 +3,7 @@ __pycache__/
 .pytest_cache/
 *.pyc
 quadratic-transformer_*.zip
+federico-lolli-ai-research_review*.zip
 site-preview/
 results/
 results_depth/
