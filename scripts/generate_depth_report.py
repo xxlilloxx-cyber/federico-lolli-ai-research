@@ -130,7 +130,7 @@ The error bars in `confirmation_mean_sd.png` are standard deviations across the 
 
 **Interpretation.** In this setup the frozen backbone and activations dominate memory. Similar memory does not mean identical compute cost.
 
-**Limitations.** The depth screen is short, the confirmation is 100 steps, only block 0 MLP combination was tested, and no full 12-layer scan or fixed-total-budget multi-layer campaign has yet been run. No inference latency or FLOPs measurement was collected. Therefore this report does not claim that a particular depth or module is universally optimal.
+**Limitations.** The depth screen is short, the confirmation is 100 steps, only block 0 MLP combination was tested, and it predates the later full-depth and fixed-total-budget campaigns; consult the canonical report for their completed results. No inference latency or FLOPs measurement was collected. Therefore this report does not claim that a particular depth or module is universally optimal.
 
 ## 6. Figures and files
 

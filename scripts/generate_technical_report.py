@@ -172,7 +172,7 @@ No completed run produced NaN or Inf. The first attempt at the 2,000-step Linear
 
 ## 13. Limitations
 
-The study uses GPT-2 Small, one attention projection, WikiText-2, a short context, three seeds, and one learning rate. The public test split was not evaluated. The GPU runtime was unstable during long campaigns. No broad hyperparameter search, larger Transformer, MLP placement, normalization variant, or downstream task was tested. These limits make the results a controlled research prototype rather than a general claim about Transformer adaptation.
+The study uses GPT-2 Small, one attention projection, WikiText-2, a short context, three seeds, and one learning rate. This archived generator describes a pre-test historical state; the canonical report documents the completed held-out evaluation. The GPU runtime was unstable during long campaigns. No broad hyperparameter search, larger Transformer, MLP placement, normalization variant, or downstream task was tested. These limits make the results a controlled research prototype rather than a general claim about Transformer adaptation.
 
 ## 14. Conclusions
 
