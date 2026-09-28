@@ -34,3 +34,7 @@ Tracked working-tree scan searched for local paths, unapproved email, common tok
 - Model and dataset revision hashes were not recorded by original runs.
 - PERA publication/acceptance status must be checked against its original source before release language is finalized.
 - Historical reports retain their own legacy metric definitions and are explicitly separated from final fresh trajectories.
+
+## Requirement checklist
+
+1. Canonical files: complete. 2. Validation definitions: complete. 3. Canonical report: complete. 4. Historical/fresh separation: complete. 5. Step-0 provenance: complete. 6. Legacy AULC definition: complete. 7. Row-vector mathematics: complete. 8. GPT-2 SVG: complete. 9. Final-campaign methods: complete; revisions unavailable. 10. Results and conclusions: complete in canonical report/site. 11. Reproducible final figures: complete. 12. Related-work distinction: complete; PERA status remains source-verification item. 13. Public navigation: complete. 14. Base-path and external repository links: complete for local assets and tested pages. 15. Reproduction instructions: complete. 16. Tracked-file privacy scope: complete; history limitation documented. 17. Versioned review ZIP: complete.
