@@ -35,7 +35,7 @@ The legacy AULC value is a **simple arithmetic mean** of the 5,000 stored valida
 ## Link, asset, and public-content checks
 
 - All site-relative HTML asset targets were checked from `docs/`; no missing local asset was found.
-- Pages are intended to be previewed under `/federico-lolli-ai-research/`, not server root. The local project-base preview is documented in `docs/projects/01-quadratic-gpt2/reproduce.html`.
+- Pages were checked under `/federico-lolli-ai-research/`, not server root: 14/14 tested page, CSS, SVG, PNG, CSV, and report targets returned HTTP 200. The local project-base preview is documented in `docs/projects/01-quadratic-gpt2/reproduce.html`.
 - Repository links use the intended public branch path and need to be retained as a stable public branch or changed to a release tag before publication.
 - The three source SVG diagrams are present in `docs/assets/figures/`; their public PNG/SVG preview copies are included only in the local review package.
 
