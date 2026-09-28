@@ -32,7 +32,7 @@ At the matched 12,288-parameter budget, final 5,000-step held-out WikiText-2 tes
 | Blocks [0, 11], rank 4 each | 3.6361 ± 0.0075 | 3.6306 ± 0.0025 |
 | Blocks [0, 3, 7, 11], rank 2 each | 3.6192 ± 0.0115 | 3.6452 ± 0.0149 |
 
-Final means and per-seed values are in `report/LONG_CONVERGENCE_AND_TEST/aggregate_long.csv` and `long_results.csv`; the site mirrors are `docs/data/`.
+Canonical final public means and per-seed values are in `docs/data/long_final_aggregate.csv` and `docs/data/long_final_per_seed.csv`; historical legacy exports are archived outside the Pages tree.
 
 ## Run locally
 

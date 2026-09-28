@@ -1,24 +1,38 @@
-# Federico Lolli AI Research — Pages source
+# Federico Lolli AI Research — GitHub Pages source
 
-This is a dependency-free, English GitHub Pages source tree prepared for review only. It must not be deployed, published, or merged to a default branch without explicit approval.
+This directory is the English GitHub Pages source for Federico Lolli's AI
+research archive. The site introduces Research Project 01, *Low-Rank Quadratic
+Adaptation of GPT-2*, and links its methods, results, references, and
+reproducibility material.
 
-## Structure
+## Local preview
 
-- `index.html` — archive home page.
-- `research/` — research-project index.
-- `projects/01-quadratic-gpt2/` — Project 01 overview, formulation, methods, results, related work, and reproduction guide.
-- `about.html` — author, approved contact address, and license scope.
-- `assets/` — stylesheet, original SVG diagrams, and selected result figures.
-- `data/` — publication-safe CSV and Markdown mirrors used by site claims.
-
-The public page text is contained directly in the page files to keep maintenance simple. Figures derived from measurements use the listed source CSV files; original explanatory SVG diagrams are stored beside the site CSS.
-
-## Local review
-
-From the repository root:
+From the repository root, mount `docs/` beneath the eventual project path:
 
 ```bash
-python3 -m http.server 8000
+mkdir -p site-preview/base
+ln -s ../../../docs site-preview/base/federico-lolli-ai-research
+python3 -m http.server 8000 --directory site-preview/base
 ```
 
-Open `http://localhost:8000/docs/`.
+Open `http://localhost:8000/federico-lolli-ai-research/`.
+
+## Research materials
+
+- `data/long_final_per_seed.csv`, `data/long_final_aggregate.csv`, and
+  `data/long_validation_trajectories.csv` are the canonical public numerical
+  evidence for the final 5,000-step campaign.
+- `data/README.md` defines the data fields; `data/FIGURE_MANIFEST.md` records
+  the source and aggregation used for each public figure.
+- `data/TECHNICAL_REPORT.md` mirrors the canonical standalone report at
+  `report/TECHNICAL_REPORT.md`.
+- `../scripts/validate_public_long_data.py` validates final endpoints, and
+  `../scripts/generate_public_long_figures.py` regenerates public figures from
+  sanitized CSVs.
+
+## Licences and attribution
+
+Original repository code is available under the [MIT License](../LICENSE).
+Original site text and original figures are available under [CC BY 4.0](../LICENSE-CONTENT.md).
+These terms do not relicense third-party software, pretrained GPT-2 weights,
+WikiText-2, cited papers, or linked external materials; see [NOTICE](../NOTICE.md).

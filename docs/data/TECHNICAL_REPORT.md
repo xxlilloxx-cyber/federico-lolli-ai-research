@@ -136,3 +136,17 @@ Validation curves are lower-is-better; shaded bands are sample SD, not confidenc
 6. Zhang, W., Mu, L., Ni, L., Jin, P., and Zhang, Y. (2026). *Polynomial Expansion Rank Adaptation: Enhancing Low-Rank Fine-Tuning with High-Order Interactions.* Findings of ACL 2026, 13287–13303. https://aclanthology.org/2026.findings-acl.650/
 
 LoRAN applies a nonlinear transformation to a low-rank **weight update**, and PERA expands low-rank **weight factors** polynomially. Neither was an experimental baseline here. This study instead evaluates a quadratic dependence on the input activation at a frozen projection.
+
+## 12. Publication-oriented analysis additions
+
+### Adapter architecture and relationship to PERA
+
+Figure `docs/assets/publication/adapter_architecture_comparison.svg` is generated from the implementation. LoRA uses a low-rank linear branch, while Symmetric computes `z=xU`, then `q=z⊙z`, then `qP`, with the common implementation scaling `α/r`. This is activation-space quadratic computation. It is related to PERA only at the level of studying polynomial structure in parameter-efficient adaptation: PERA expands low-rank factors in parameter space before factor composition. The methods are not mathematically identified here, and PERA is not an empirical baseline in these GPT-2 experiments. Squaring projections in Symmetric can produce cross terms within each `(xu_k)^2`; its output directions are constrained by the shared U columns and rank bound described above.
+
+### Rank, placement, ablation, and missing analyses
+
+`docs/assets/publication/performance_vs_rank.svg` plots recorded validation summaries across mixed historical protocols and is explicitly not a controlled factorial rank study. Placement and fixed-budget evidence is retained in the depth and local-rank reports. The ablation evidence consists only of actually tested Base, LoRA, element-wise Quadratic, Signed Quadratic, Feature Interaction, Symmetric, and Linear+Quadratic runs; see `docs/EXPERIMENT_AUDIT.md`. Existing artifacts do not support a downstream accuracy/F1 claim, Hessian heatmap, effective-rank spectrum, or inference-latency result. Required new experiments are specified in `docs/REQUIRED_ADDITIONAL_EXPERIMENTS.md`.
+
+### Literature context
+
+LoRA is a low-rank weight update; DoRA, MoRA, HiRA, DeLoRA, RanLoRA, and TLoRA are literature context rather than direct baselines unless identical backbone, data, protocol, and budget are evaluated. Published results from those works, including PERA's ACL 2026 findings, are not numerically comparable with this GPT-2/WikiText-2 loss study. The PERA citation is Zhang et al., *Polynomial Expansion Rank Adaptation: Enhancing Low-Rank Fine-Tuning with High-Order Interactions*, Findings of ACL 2026, DOI 10.18653/v1/2026.findings-acl.650.

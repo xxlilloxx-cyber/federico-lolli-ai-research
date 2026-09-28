@@ -1,8 +1,8 @@
 # Public-release review audit
 
-**Repository root:** the checked-out repository root (the local checkout name is not a repository subdirectory).  
-**Branch:** `public-release-preparation`  
-**Commit at audit start:** `a8bad9a`  
+**Repository root:** the checked-out repository root (the local checkout name is not a repository subdirectory).
+**Branch:** `public-release-preparation`
+**Commit at audit start:** `a8bad9a`
 **Publication status:** local review only. No push, merge, GitHub Pages enablement, deployment, or public release was performed.
 
 ## Canonical sources and mirrors
@@ -41,24 +41,35 @@ The legacy AULC value is a **simple arithmetic mean** of the 5,000 stored valida
 
 ## Privacy review scope and limits
 
-Tracked working-tree files and the intended `docs/` deployment payload were scanned for local home paths, unapproved email addresses, common token markers, and private-key markers. No matches were found. Original experimental artifacts remain locally preserved and ignored. This is **not** proof that unreachable local reflogs, external backups, or a future remote history are clean. No destructive history rewrite was performed. A reachable-branch history scan must be repeated immediately before any push/release.
+Tracked working-tree files and the intended `docs/` deployment payload were scanned for local home paths, unapproved email addresses, common token markers, and private-key markers. No matches were found. Original experimental artifacts remain locally preserved and ignored.
+
+**Release blocker found during the all-references history scan.** Local stash
+references contain historical commits with raw experiment-result directories,
+run logs, configuration metadata, and adapter checkpoint artifacts. Those
+historical commits are not ancestors of the current public-release branch, but
+they are reachable through local stash references and must not be pushed or
+otherwise included in a publication ref. No values from those artifacts are
+recorded here. Before any publication, remove or isolate the affected local
+stash references through an approved history-cleanup process, then repeat the
+history scan on the exact branch/tag selected for release. No destructive
+rewrite was performed in this review pass.
 
 ## Requirement checklist
 
-1. Canonical files and mirrors — complete.  
-2. Explicit validation fields — complete.  
-3. Canonical report rewritten — complete.  
-4. Historical versus fresh comparisons separated — complete.  
-5. Step-0 provenance and row accounting — complete.  
-6. Legacy AULC defined; no silent redefinition — complete.  
-7. Row-vector mathematics/scaling — complete.  
-8. GPT-2 insertion SVG corrected — complete.  
-9. Recorded methods and unavailable metadata marked — complete.  
-10. Final and historical results/conclusions — complete.  
-11. Reproducible figures plus manifest/checker — complete.  
-12. Related work: LoRAN/PERA distinction and ACL 2026 record — complete.  
-13. Public identity/navigation/contact/license scope — complete.  
-14. Project-base link policy documented; final remote link check remains required before deployment.  
-15. Reproduction instructions and public data schema — complete.  
-16. Working-tree/deployment privacy review complete with stated history limitation.  
-17. Review ZIP is generated from the current working tree after the final checks.
+1. Canonical files and mirrors — complete.
+2. Explicit validation fields — complete.
+3. Canonical report rewritten — complete.
+4. Historical versus fresh comparisons separated — complete.
+5. Step-0 provenance and row accounting — complete.
+6. Legacy AULC defined; no silent redefinition — complete.
+7. Row-vector mathematics/scaling — complete.
+8. GPT-2 insertion SVG corrected — complete.
+9. Recorded methods and unavailable metadata marked — complete.
+10. Final and historical results/conclusions — complete.
+11. Reproducible figures plus manifest/checker — complete.
+12. Related work: LoRAN/PERA distinction and ACL 2026 record — complete.
+13. Public identity/navigation/contact/license scope — complete.
+14. Project-base link policy documented; final remote link check remains required before deployment.
+15. Reproduction instructions and public data schema — complete.
+16. Working-tree/deployment privacy review passed; all-references history scan found the local-stash raw-artifact blocker described above.
+17. Review ZIP generation is deferred until the history blocker is resolved or explicitly accepted for a branch-only release procedure.

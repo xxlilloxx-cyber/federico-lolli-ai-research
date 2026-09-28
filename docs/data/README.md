@@ -19,10 +19,10 @@ diagnostics.
   every run. The post-update step-1 measurements are intentionally excluded so
   curves do not mix the common baseline with a post-update value.
 
-`aggregate_long.csv` and `long_results.csv` are retained legacy exports. Their
-historical `validation_loss` field is a best-recorded summary, not necessarily
-the step-5,000 value. Use the `long_*` files above for current figures and
-final-study tables.
+`aggregate_long.csv`, `long_results.csv`, and `MASTER_RESULTS.csv` are retained in
+`archive/public-data-legacy/`, outside the Pages deployment tree. Their historical
+`validation_loss` fields are not final-step definitions. Use the canonical `long_*`
+files above for current figures and final-study tables.
 
 Regenerate these exports privately with `scripts/export_public_long_data.py`.
 It requires the ignored original run artifacts. Regenerate public figures from
