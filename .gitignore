@@ -4,6 +4,8 @@ __pycache__/
 *.pyc
 quadratic-transformer_*.zip
 federico-lolli-ai-research_review*.zip
+federico-lolli-ai-research_complete_review*.zip
+review-package-*/
 site-preview/
 results/
 results_depth/
