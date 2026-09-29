@@ -7,7 +7,16 @@ federico-lolli-ai-research_review*.zip
 federico-lolli-ai-research_complete_review*.zip
 review-package-*/
 site-preview/
-results/
+# Private historical raw results remain local. Publication-safe tables,
+# figures, and manifests under results/ are explicitly tracked.
+/results/*
+!/results/README.md
+!/results/tables/
+!/results/tables/**
+!/results/figures/
+!/results/figures/**
+!/results/manifests/
+!/results/manifests/**
 results_depth/
 results_extended/
 results_local_rank/

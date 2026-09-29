@@ -1,0 +1,23 @@
+{
+  "dataset": "ag_news",
+  "backbone": "gpt2",
+  "methods": ["lora", "symmetric_quadratic"],
+  "placement": "transformer.h[0].attn.c_proj",
+  "rank": 4,
+  "alpha": 4.0,
+  "seeds": [42, 123, 456],
+  "steps": 500,
+  "train_samples": 4096,
+  "validation_samples": 1000,
+  "test_samples": 7600,
+  "maximum_sequence_length": 128,
+  "batch_size": 1,
+  "gradient_accumulation": 4,
+  "optimizer": "AdamW",
+  "learning_rate": 0.0003,
+  "weight_decay": 0.0,
+  "scheduler": "none",
+  "evaluation_every_steps": 100,
+  "checkpoint_selection": "best validation macro-F1; test only final checkpoint",
+  "note": "Publication-safe protocol reconstructed exactly from the six completed per-run config.json files. Raw per-run files remain private."
+}

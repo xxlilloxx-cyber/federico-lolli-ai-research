@@ -24,7 +24,7 @@ def test_final_trajectory_endpoints_match_aggregate_table():
 
 
 def test_canonical_report_uses_explicit_final_study_terms():
-    report = (ROOT / "report" / "TECHNICAL_REPORT.md").read_text()
+    report = (ROOT / "research" / "paper" / "TECHNICAL_REPORT.md").read_text()
     for term in (
         "best_recorded_validation_loss",
         "final_validation_loss",

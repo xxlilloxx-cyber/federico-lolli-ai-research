@@ -1,54 +1,111 @@
 # Federico Lolli’s AI Research
 
-Author: Federico Lolli · Contact: xxlilloxx@gmail.com
+**Author:** Federico Lolli
 
-This repository is an archive for reproducible exploratory AI research. It currently contains **Research Project 01: Low-Rank Quadratic Adaptation of GPT-2**.
+**Contact:** xxlilloxx@gmail.com
+**Status:** independent exploratory research; no claim of peer review or
+universal superiority.
 
-## Project 01
+## Research objective
 
-The project asks whether a small, activation-dependent quadratic correction can adapt a frozen GPT-2 Small projection usefully when compared with a parameter-matched linear LoRA correction. It evaluates a frozen GPT-2 backbone on WikiText-2, beginning with several adapter families and ending with a controlled 12,288-parameter, three-seed, 5,000-step LoRA-versus-Symmetric-Quadratic study with held-out test evaluation.
+Research Project 01 asks whether structured quadratic interactions can improve
+the expressive efficiency of low-rank Transformer adaptation under controlled
+parameter budgets. A pretrained GPT-2 backbone is frozen, and only small
+adapter branches are trained.
 
-The measured conclusion is conditional: Symmetric Quadratic has a clear advantage with one concentrated insertion point, the advantage narrows for two points, and LoRA has lower held-out test loss with four distributed points. The repository does not claim universal superiority or novelty by assertion.
+LoRA supplies the direct linear baseline:
+
+`Delta y = (alpha/r)(xA)B`.
+
+The Symmetric Quadratic Adapter instead learns:
+
+`Delta y = (alpha/r)((xU) ⊙ (xU))P`.
+
+For output `j`, this is the symmetric quadratic form
+`x Q_j x^T`, with `Q_j=(alpha/r)U diag(P[:,j])U^T`. The implementation shares
+the projection directions in `U` across outputs and learns signed
+output-specific coefficients in `P`.
+
+## Experimental program
+
+The repository preserves distinct campaigns rather than combining incompatible
+protocols:
+
+- historical adapter-family, placement, depth, and fixed-budget studies;
+- a six-run controlled GPT-2/AG News downstream comparison;
+- a 24-run, 1,000-step WikiText-2 rank screening;
+- an independent 24-run, 5,000-step WikiText-2 rank confirmation with
+  final-checkpoint held-out testing;
+- a separate seed-42 constant-effective-scale ablation;
+- checkpoint-only spectral, Jacobian, Hessian, and convergence analyses;
+- a focused rank-4 GPU cost benchmark.
+
+## Main measured findings
+
+Under the controlled 5,000-step WikiText-2 block-0 protocol, Symmetric had
+lower mean final validation and held-out test loss than LoRA at ranks 1, 2, 4,
+and 8 across the three evaluated seeds. At rank 8, mean test loss was
+`3.7319 ± 0.0035` for LoRA and `3.6938 ± 0.0044` for Symmetric.
+
+The independent AG News experiment had the opposite mean ordering: LoRA test
+accuracy was `0.8201 ± 0.0051`, while Symmetric accuracy was
+`0.8021 ± 0.0240`. These results support task-, rank-, placement-, and
+training-duration-dependent behavior. They do not establish universal
+superiority, state of the art, or broad transfer.
 
 ## Repository map
 
-- `docs/` — English static GitHub Pages source for review. It is not deployed.
-- `src/` — adapter implementation, insertion logic, checkpoint save/load, and trainer.
-- `scripts/` — environment checks, runners, test evaluation, and analysis.
-- `configs/` — experiment configurations.
-- `tests/` — unit and checkpoint tests.
-- `report/` — technical reports and publication-safe aggregate tables.
-- `docs/data/` — site mirrors of final tables and the technical report.
+- [`src/`](src/) — adapter and training implementation.
+- [`scripts/`](scripts/) — grouped training, evaluation, aggregation, analysis,
+  figure, and validation tools.
+- [`config/`](config/) — historical and controlled publication-safe protocols.
+- [`experiments/`](experiments/) — campaign reports and links to private raw
+  evidence.
+- [`results/`](results/) — canonical publication-safe tables, figures, and
+  provenance manifests.
+- [`research/`](research/) — paper, mathematical analysis, reproducibility, and
+  limitations.
+- [`comparisons/`](comparisons/) — verified related work, mathematical
+  equivalence, methodology, and originality assessment.
+- [`docs/`](docs/) — generated/static GitHub Pages source.
+- [`tests/`](tests/) — unit and evidence-consistency tests.
+- [`tmp/`](tmp/) — recoverable archive for non-canonical tracked material.
 
-The Pages site is organized for future projects. Project 01 has separate overview, formulation, methods, results, related-work, and reproduction pages. Open `docs/index.html` locally or follow `docs/README.md` for a local preview.
+See [`REPOSITORY_STRUCTURE.md`](REPOSITORY_STRUCTURE.md) for the complete map.
 
-## Key final result
+## Read and reproduce
 
-At the matched 12,288-parameter budget, final 5,000-step held-out WikiText-2 test loss is:
+- Canonical technical report:
+  [`research/paper/TECHNICAL_REPORT.md`](research/paper/TECHNICAL_REPORT.md).
+- Final evidence review:
+  [`research/paper/FINAL_RESEARCH_REVIEW.md`](research/paper/FINAL_RESEARCH_REVIEW.md).
+- Reproduction guide:
+  [`research/reproducibility/REPRODUCIBILITY.md`](research/reproducibility/REPRODUCIBILITY.md).
+- Model comparison:
+  [`comparisons/MODEL_COMPARISON.md`](comparisons/MODEL_COMPARISON.md).
+- Static site: `docs/index.html`; intended project URL:
+  <https://xxlilloxx-cyber.github.io/federico-lolli-ai-research/>.
 
-| Geometry | LoRA | Symmetric Quadratic |
-|---|---:|---:|
-| Block [2], rank 8 | 3.7741 ± 0.0022 | 3.7067 ± 0.0060 |
-| Blocks [0, 11], rank 4 each | 3.6361 ± 0.0075 | 3.6306 ± 0.0025 |
-| Blocks [0, 3, 7, 11], rank 2 each | 3.6192 ± 0.0115 | 3.6452 ± 0.0149 |
-
-Canonical final public means and per-seed values are in `docs/data/long_final_aggregate.csv` and `docs/data/long_final_per_seed.csv`; historical legacy exports are archived outside the Pages tree.
-
-## Run locally
+Minimal validation from the repository root:
 
 ```bash
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
-.venv/bin/python scripts/check_environment.py
-PYTHONPATH=. PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 .venv/bin/pytest -q
+.venv/bin/python scripts/validation/check_environment.py
+PYTHONPATH=. PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 .venv/bin/python -m pytest -q
+.venv/bin/python scripts/validation/validate_public_long_data.py
 ```
 
-The final workflow is implemented in `scripts/run_long_convergence_5000.py`, `scripts/evaluate_long_test.py`, and `scripts/analyze_long_convergence.py`. It was designed for a 4 GB NVIDIA GPU using a FP16 backbone, FP32 adapters, 128-token sequences, batch size 1, and gradient accumulation 4.
+Plot reproduction uses publication-safe CSVs and does not require private
+checkpoints. Training runners create ignored raw artifacts; consult the
+campaign README before launching one.
 
 ## Licensing and third-party scope
 
-Original repository code is licensed under the [MIT License](LICENSE). Original written material and original figures are licensed under [CC BY 4.0](LICENSE-CONTENT.md). These licenses do not apply to GPT-2 weights, WikiText-2, third-party libraries, external figures, or cited research; see [NOTICE.md](NOTICE.md).
+Original code is licensed under the [MIT License](LICENSE). Original text and
+figures are licensed under [CC BY 4.0](LICENSE-CONTENT.md). These licences do
+not cover GPT-2 weights, WikiText-2, AG News, third-party libraries, cited
+papers, or external assets; see [NOTICE.md](NOTICE.md).
 
-## Publication status
-
-The site and public-release material are on an unpublished review branch. Do not deploy GitHub Pages, merge to the default branch, or publish without Federico Lolli’s explicit approval.
+No remote publication, merge, or deployment is performed by repository
+reorganization work.

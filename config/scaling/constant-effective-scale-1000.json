@@ -1,0 +1,18 @@
+{
+  "dataset": "wikitext/wikitext-2-raw-v1",
+  "backbone": "gpt2",
+  "methods": ["lora", "symmetric_quadratic"],
+  "placement": "transformer.h[0].attn.c_proj",
+  "ranks": [1, 2, 4, 8],
+  "alpha_by_rank": {"1": 1.0, "2": 2.0, "4": 4.0, "8": 8.0},
+  "effective_alpha_over_rank": 1.0,
+  "seeds": [42],
+  "steps": 1000,
+  "sequence_length": 128,
+  "gradient_accumulation": 4,
+  "optimizer": "AdamW",
+  "learning_rate": 0.0003,
+  "evaluation_every_steps": 25,
+  "checkpoint_steps": [1000],
+  "note": "Single-seed exploratory Policy-B ablation; Policy A reuses the independent controlled screening."
+}

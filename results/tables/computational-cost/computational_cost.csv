@@ -1,0 +1,3 @@
+method,rank,sequence_length,batch_size,warmup_iterations,measured_iterations,forward_ms_mean,forward_ms_sample_sd,backward_ms_mean,backward_ms_sample_sd,tokens_per_second_forward,peak_vram_mb,trainable_parameters
+LoRA,4,128,1,10,30,12.157234166678185,0.24273008998179327,14.805459933328772,0.23619712845730917,10528.71058047362,429.05419921875,6144
+Symmetric Quadratic,4,128,1,10,30,12.18411100000291,0.23620735676121968,14.765880433333223,0.18781393140877384,10505.485381737693,430.30517578125,6144

@@ -1,8 +1,8 @@
 # Project 01 public numerical data
 
-These are the publication-safe, authoritative exports for the final 5,000-step
-campaign. They contain no local paths, checkpoint payloads, logs, or machine
-diagnostics.
+These are publication-safe Pages mirrors of the canonical exports under
+`results/tables/`. They contain no local paths, checkpoint payloads, logs, or
+machine diagnostics and must not be edited independently.
 
 * `long_final_per_seed.csv` has one row for each of the 18 completed runs.
   `best_validation_loss` is the minimum fresh validation loss within that run;
@@ -20,10 +20,10 @@ diagnostics.
   curves do not mix the common baseline with a post-update value.
 
 `aggregate_long.csv`, `long_results.csv`, and `MASTER_RESULTS.csv` are retained in
-`archive/public-data-legacy/`, outside the Pages deployment tree. Their historical
+`tmp/duplicate-files/public-data-legacy/`, outside the Pages deployment tree. Their historical
 `validation_loss` fields are not final-step definitions. Use the canonical `long_*`
 files above for current figures and final-study tables.
 
-Regenerate these exports privately with `scripts/export_public_long_data.py`.
+Regenerate these exports privately with `scripts/aggregation/export_public_long_data.py`.
 It requires the ignored original run artifacts. Regenerate public figures from
-these CSVs with `scripts/generate_public_long_figures.py`.
+these CSVs with `scripts/figures/generate_public_long_figures.py`.

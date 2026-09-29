@@ -1,0 +1,17 @@
+{
+  "dataset": "wikitext/wikitext-2-raw-v1",
+  "backbone": "gpt2",
+  "methods": ["lora", "symmetric_quadratic"],
+  "placement": "transformer.h[0].attn.c_proj",
+  "ranks": [1, 2, 4, 8],
+  "alpha": 4.0,
+  "seeds": [42, 123, 456],
+  "steps": 1000,
+  "sequence_length": 128,
+  "gradient_accumulation": 4,
+  "optimizer": "AdamW",
+  "learning_rate": 0.0003,
+  "evaluation_every_steps": 25,
+  "checkpoint_steps": [1000],
+  "note": "Publication-safe protocol reconstructed from completed per-run configs; raw runs remain private."
+}

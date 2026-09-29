@@ -20,14 +20,15 @@ Open `http://localhost:8000/federico-lolli-ai-research/`.
 ## Research materials
 
 - `data/long_final_per_seed.csv`, `data/long_final_aggregate.csv`, and
-  `data/long_validation_trajectories.csv` are the canonical public numerical
-  evidence for the final 5,000-step campaign.
+  `data/long_validation_trajectories.csv` are generated Pages mirrors of the
+  canonical public evidence under `../results/tables/`.
 - `data/README.md` defines the data fields; `data/FIGURE_MANIFEST.md` records
   the source and aggregation used for each public figure.
 - `data/TECHNICAL_REPORT.md` mirrors the canonical standalone report at
-  `report/TECHNICAL_REPORT.md`.
-- `../scripts/validate_public_long_data.py` validates final endpoints, and
-  `../scripts/generate_public_long_figures.py` regenerates public figures from
+  `../research/paper/TECHNICAL_REPORT.md`.
+- `../scripts/validation/validate_public_long_data.py` validates final
+  endpoints, and `../scripts/figures/generate_public_long_figures.py`
+  regenerates public figures from
   sanitized CSVs.
 
 ## Licences and attribution
