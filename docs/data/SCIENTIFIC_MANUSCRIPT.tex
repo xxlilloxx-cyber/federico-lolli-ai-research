@@ -1,0 +1,92 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,graphicx,hyperref}
+\title{Symmetric Factorized Quadratic Adaptation:\\A Controlled Study of Nonlinear Low-Rank Adapters for GPT-2}
+\author{Federico Lolli\\\texttt{xxlilloxx@gmail.com}}
+\date{}
+\begin{document}
+\maketitle
+\begin{abstract}
+We compare LoRA with an activation-dependent symmetric quadratic adapter at
+matched parameter counts in frozen GPT-2. An independent 24-run WikiText-2
+confirmation favors Symmetric in mean final validation and held-out loss at
+ranks 1, 2, 4, and 8, whereas six controlled AG News runs favor LoRA in mean
+accuracy and macro-F1. A single-seed scaling ablation, convergence curves,
+local-Jacobian spectra, adapter Hessians, and a matched cost benchmark show that
+the result is task and protocol dependent rather than universal.
+\end{abstract}
+
+\section{Introduction}
+Parameter-efficient fine-tuning adapts a pretrained model while keeping its
+backbone frozen. We ask whether a quadratic function of a projection input can
+offer useful capacity at the same parameter count as a LoRA branch. This is an
+independently evaluated formulation and controlled experimental study, not a
+claim that quadratic low-rank networks are unprecedented.
+
+\section{Method}
+For a row vector $x\in\mathbb{R}^{1\times d}$ and frozen projection
+$y_{base}=xW+b$, LoRA and Symmetric add
+\begin{align}
+\Delta y_L &= \frac{\alpha}{r}(xA)B,\\
+\Delta y_S &= \frac{\alpha}{r}((xU)\odot(xU))P.
+\end{align}
+Here $A,U\in\mathbb{R}^{d\times r}$ and
+$B,P\in\mathbb{R}^{r\times d_{out}}$. For output $j$,
+\begin{equation}
+\Delta y_{S,j}=xQ_jx^T,\qquad
+Q_j=\frac{\alpha}{r}\sum_kP_{kj}u_ku_k^T,
+\end{equation}
+so $Q_j$ is symmetric and $\operatorname{rank}(Q_j)\le r$.
+
+\section{Experiments}
+Controlled WikiText-2 experiments use frozen GPT-2 Small, 128-token causal
+language-model blocks, block-0 \texttt{attn.c\_proj}, ranks 1/2/4/8, and seeds
+42/123/456. Twenty-four fresh confirmation runs use 5,000 optimizer steps.
+AG News compares the same two methods over six paired runs and reports held-out
+accuracy and macro-F1. Full configurations and provenance are supplied with the
+repository.
+
+\section{Results}
+\begin{table}[h]
+\centering
+\caption{Mean final-checkpoint loss $\pm$ sample SD over three seeds.}
+\begin{tabular}{rcccc}\toprule
+Rank & LoRA val & Symmetric val & LoRA test & Symmetric test\\\midrule
+1 & 3.5734$\pm$.0051 & 3.5314$\pm$.0207 & 3.9256$\pm$.0009 & 3.9131$\pm$.0042\\
+2 & 3.4773$\pm$.0057 & 3.4340$\pm$.0249 & 3.8492$\pm$.0025 & 3.8305$\pm$.0144\\
+4 & 3.3483$\pm$.0093 & 3.3101$\pm$.0011 & 3.7656$\pm$.0054 & 3.7429$\pm$.0024\\
+8 & 3.3054$\pm$.0117 & 3.2446$\pm$.0096 & 3.7319$\pm$.0035 & 3.6938$\pm$.0044\\\bottomrule
+\end{tabular}
+\end{table}
+
+AG News favors LoRA: test accuracy is $0.8201\pm0.0051$ versus
+$0.8021\pm0.0240$, and macro-F1 is $0.8156\pm0.0050$ versus
+$0.7929\pm0.0315$. Thus the language-model ordering is task dependent.
+
+\section{Scaling, derivatives, and cost}
+The seed-42 constant-$\alpha/r$ ablation preserves the screening sign pattern
+but changes its magnitude. LoRA has constant adapter Jacobian
+$J_L=(\alpha/r)AB$ and zero adapter-only Hessian. Symmetric has
+\begin{align}
+J_S(x)&=2\frac{\alpha}{r}U\operatorname{diag}(xU)P,\\
+H_S&=2\frac{\alpha}{r}U\operatorname{diag}(Pc)U^T
+\end{align}
+for fixed output reduction $c$. Analytical derivatives match autograd. At rank
+4 and length 128, forward latency is $12.157\pm0.243$ ms for LoRA and
+$12.184\pm0.236$ ms for Symmetric; peak VRAM is 429.05 and 430.31 MiB.
+
+\section{Limitations and conclusion}
+The evidence covers GPT-2 Small, WikiText-2, AG News, three main seeds, one
+optimizer schedule, and a focused controlled placement. The scaling ablation
+has one seed, and no full-block Hessian was completed. Symmetric provides useful
+quadratic adaptation capacity in the tested language-model setting, while LoRA
+is stronger on the tested downstream classifier. Neither method is universally
+superior on this evidence.
+
+\section*{References}
+Complete verified references and links are maintained in
+\texttt{comparisons/papers/REFERENCES.md}; principal sources include Hu et al.
+(LoRA, ICLR 2022), Liu et al. (DoRA, ICML 2024), Jiang et al. (MoRA, 2024),
+Huang et al. (HiRA, ICLR 2025), Zhang et al. (PERA, Findings of ACL 2026), and
+Xu et al. (QuadraNet V2, WACV 2026).
+\end{document}

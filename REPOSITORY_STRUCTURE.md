@@ -42,10 +42,11 @@ paths because runners and provenance records refer to them and they are private.
 - `results/figures/`: canonical figures grouped by campaign.
 - `results/manifests/FIGURE_MANIFEST.csv`: per-figure source and aggregation.
 - `research/paper/TECHNICAL_REPORT.md`: canonical complete report.
+- `research/paper/SCIENTIFIC_MANUSCRIPT.md` and `.tex`: canonical paper sources.
 - `research/paper/FINAL_RESEARCH_REVIEW.md`: concise integrated evidence review.
 - `research/mathematical-analysis/`: derivative and mechanism reports.
 - `research/reproducibility/`: audit, completion matrix, and reproduction.
-- `research/limitations/`: unresolved experiments and release audits.
+- `research/limitations/`: publication readiness, limitations, and release audits.
 
 `docs/data/` and `docs/assets/` contain Pages mirrors generated from canonical
 sources. They remain in the deployable tree so the static site works without a

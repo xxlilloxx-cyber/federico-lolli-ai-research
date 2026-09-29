@@ -118,7 +118,7 @@ The final campaign's mean wall-clock times / throughput are: concentrated LoRA 7
 
 The supported positive result is narrow but meaningful: explicit low-rank quadratic corrections train stably with roughly 0.01% of a frozen 124M-parameter backbone and improve the concentrated matched placement on both validation and held-out WikiText-2. The benefit decreases when capacity is distributed across depth and with longer optimization; four-layer LoRA ultimately has lower held-out loss. One possible interpretation is that distributed linear corrections, composed through an already nonlinear Transformer, recover some expressive benefit of a local explicit quadratic term. That remains a hypothesis, not a demonstrated mechanism.
 
-Limits are GPT-2 Small only, WikiText-2 only, three seeds, context length 128, one optimizer/learning-rate protocol, final long runs focused on `attn.c_proj`, coupled rank/scale/placement changes, no independent dataset, no second Transformer family, no downstream task, and no controlled factorial rank-by-depth experiment. The next informative studies are an independent dataset, a second model family, factorial local-rank/scale experiments, long MLP and attention-plus-MLP placement comparisons, and a test of whether the larger Symmetric test–validation difference reproduces.
+Limits are GPT-2 Small only, two datasets, three main seeds, context length 128, one optimizer/learning-rate protocol, controlled long runs focused on block-0 `attn.c_proj`, coupled rank/parameter-count/scale changes, a single-seed constant-scale ablation, no second Transformer family, and no controlled factorial rank-by-depth experiment. AG News supplies an independent task but not an independent language-model corpus. The next informative studies are a second model family and language-model dataset, a fully factorial rank/scale experiment, and long MLP and attention-plus-MLP placement comparisons.
 
 ## 10. Reproducibility and figure guide
 
@@ -126,31 +126,16 @@ Canonical public final data are under `results/tables/`; `docs/data/` contains g
 
 Validation curves are lower-is-better; shaded bands are sample SD, not confidence intervals. The signed delta curve is Symmetric minus LoRA, so a negative value favours Symmetric. Test bars show individual seeds plus mean ± sample SD. The test–validation figure is secondary/descriptive and does not identify a cause.
 
-## 11. References
+## 11. Controlled downstream evaluation
 
-1. Hu, E. J., et al. (2022). *LoRA: Low-Rank Adaptation of Large Language Models.* ICLR. https://arxiv.org/abs/2106.09685
-2. Vaswani, A., et al. (2017). *Attention Is All You Need.* NeurIPS. https://arxiv.org/abs/1706.03762
-3. Radford, A., et al. (2019). *Language Models are Unsupervised Multitask Learners.* OpenAI technical report.
-4. Merity, S., Xiong, C., Bradbury, J., and Socher, R. (2016). *Pointer Sentinel Mixture Models.* ICLR. https://arxiv.org/abs/1609.07843
-5. Li, Y., Song, L., and Hou, H. (2024). *LoRAN: Improved Low-Rank Adaptation by a Non-Linear Transformation.* Findings of EMNLP 2024, 3134–3143. https://aclanthology.org/2024.findings-emnlp.177/
-6. Zhang, W., Mu, L., Ni, L., Jin, P., and Zhang, Y. (2026). *Polynomial Expansion Rank Adaptation: Enhancing Low-Rank Fine-Tuning with High-Order Interactions.* Findings of ACL 2026, 13287–13303. https://aclanthology.org/2026.findings-acl.650/
+The matched AG News experiment used GPT-2, block-0 `attn.c_proj`, rank 4,
+9,216 trainable parameters including the classifier, 500 steps, and seeds 42,
+123, and 456. LoRA obtained test accuracy 0.8201 ± 0.0051 and macro-F1 0.8156
+± 0.0050. Symmetric obtained 0.8021 ± 0.0240 and 0.7929 ± 0.0315. Symmetric
+was higher on one of three paired seeds. This controlled negative result rules
+out a task-independent superiority claim.
 
-LoRAN applies a nonlinear transformation to a low-rank **weight update**, and PERA expands low-rank **weight factors** polynomially. Neither was an experimental baseline here. This study instead evaluates a quadratic dependence on the input activation at a frozen projection.
-
-## 12. Publication-oriented analysis additions
-
-### Adapter architecture and relationship to PERA
-
-Figure `docs/assets/publication/adapter_architecture_comparison.svg` is generated from the implementation. LoRA uses a low-rank linear branch, while Symmetric computes `z=xU`, then `q=z⊙z`, then `qP`, with the common implementation scaling `α/r`. This is activation-space quadratic computation. It is related to PERA only at the level of studying polynomial structure in parameter-efficient adaptation: PERA expands low-rank factors in parameter space before factor composition. The methods are not mathematically identified here, and PERA is not an empirical baseline in these GPT-2 experiments. Squaring projections in Symmetric can produce cross terms within each `(xu_k)^2`; its output directions are constrained by the shared U columns and rank bound described above.
-
-### Rank, placement, ablation, and missing analyses
-
-`docs/assets/publication/performance_vs_rank.svg` plots recorded validation summaries across mixed historical protocols and is explicitly not a controlled factorial rank study. Placement and fixed-budget evidence is retained in the depth and local-rank reports. The ablation evidence consists only of actually tested Base, LoRA, element-wise Quadratic, Signed Quadratic, Feature Interaction, Symmetric, and Linear+Quadratic runs; see `docs/EXPERIMENT_AUDIT.md`. Existing artifacts do not support a downstream accuracy/F1 claim, Hessian heatmap, effective-rank spectrum, or inference-latency result. Required new experiments are specified in `docs/REQUIRED_ADDITIONAL_EXPERIMENTS.md`.
-
-### Literature context
-
-LoRA is a low-rank weight update; DoRA, MoRA, HiRA, DeLoRA, RanLoRA, and TLoRA are literature context rather than direct baselines unless identical backbone, data, protocol, and budget are evaluated. Published results from those works, including PERA's ACL 2026 findings, are not numerically comparable with this GPT-2/WikiText-2 loss study. The PERA citation is Zhang et al., *Polynomial Expansion Rank Adaptation: Enhancing Low-Rank Fine-Tuning with High-Order Interactions*, Findings of ACL 2026, DOI 10.18653/v1/2026.findings-acl.650.
-## Controlled rank and mechanism evidence (September 2026 update)
+## 12. Controlled rank confirmation
 
 A separate factorial confirmation trained fresh single-insertion-point adapters
 for 5,000 optimizer steps at ranks 1, 2, 4, and 8, with seeds 42, 123, and 456.
@@ -179,3 +164,124 @@ its fixed-linear-reduction Hessian is `2(alpha/r) U diag(Pc) U^T`. Analytical
 derivatives matched autograd. The measured spectra and Hessian summaries are
 reported in `research/mathematical-analysis/MECHANISM_ANALYSIS_REPORT.md`; they describe structure and do not
 establish a causal mechanism for task performance.
+
+## 13. Scaling ablation
+
+The separate seed-42 1,000-step ablation compared fixed $\alpha=4$ with a
+constant effective scale $\alpha/r=1$. Under constant scale, paired validation
+differences at ranks 1, 2, 4, and 8 were +0.0410, -0.0292, -0.0750, and
+-0.0975. The rank-8 fixed-alpha result was -0.1177. The sign pattern persisted
+for this seed, while magnitude changed. Because this is a single-seed result,
+it is exploratory and does not isolate a population-level scaling interaction.
+
+## 14. Spectral, derivative, and interaction analysis
+
+LoRA has an input-independent effective update and adapter Jacobian
+$J_L=(\alpha/r)AB$. Symmetric has no single constant update matrix; its local
+Jacobian is
+
+$$J_S(x)=2\frac{\alpha}{r}U\operatorname{diag}(xU)P.$$
+
+For a fixed linear output reduction $c$, its adapter Hessian is
+
+$$H_S=2\frac{\alpha}{r}U\operatorname{diag}(Pc)U^T,$$
+
+while LoRA's adapter-only Hessian is zero. Analytical Jacobian and Hessian
+implementations matched autograd tests. LoRA effective-update entropy rank grew
+from 1.00 to 6.57 across nominal ranks 1 to 8; Symmetric mean local-Jacobian
+effective rank grew from 1.00 to approximately 5.59. These are different
+objects and do not support a claim of higher Symmetric weight rank. The
+adapter-only Symmetric Hessian is input independent for the selected linear
+reduction, so repeated tokens are not treated as independent Hessian evidence.
+The planned full-block Hessian was not completed and is excluded from results.
+
+## 15. Matched computational benchmark
+
+At rank 4, batch size 1, and 128 tokens, mean forward latency was 12.157 ±
+0.243 ms for LoRA and 12.184 ± 0.236 ms for Symmetric. Mean backward latency
+was 14.805 ± 0.236 and 14.766 ± 0.188 ms, and peak allocated VRAM was 429.05
+and 430.31 MiB. Forward throughput was 10,529 and 10,505 tokens/s. The
+throughput agrees with 128 tokens per approximately 12 ms; the earlier shorthand
+"10.5 tokens/s" omitted a factor of one thousand.
+
+## 16. Integrated conclusion
+
+The completed evidence has two central outcomes. Under the controlled
+WikiText-2 configuration, Symmetric has lower mean final validation and
+held-out test loss at ranks 1, 2, 4, and 8. Under controlled AG News
+classification, LoRA has higher mean accuracy and macro-F1. Mathematical and
+checkpoint analyses verify different local derivative structure but do not
+establish it as the causal mechanism. The strongest supported conclusion is
+that explicit quadratic adaptation is useful under some protocols and depends
+on task, rank, scaling, placement, and optimization duration.
+
+Canonical per-seed tables, figure provenance, and reproduction commands are in
+`results/`, `research/reproducibility/`, and `experiments/`. Related-work and
+equivalence qualifications are maintained in `comparisons/`.
+
+## 17. Controlled per-seed measurements
+
+The following values come directly from
+`results/tables/rank-confirmation-5000/rank_5000_per_seed.csv`. They are final
+fresh validation and held-out test loss from the same step-5,000 checkpoint.
+
+| Method | Rank | Seed | Final validation | Final test |
+|---|---:|---:|---:|---:|
+| LoRA | 1 | 42 | 3.5676 | 3.9266 |
+| LoRA | 1 | 123 | 3.5769 | 3.9247 |
+| LoRA | 1 | 456 | 3.5757 | 3.9255 |
+| Symmetric | 1 | 42 | 3.5489 | 3.9100 |
+| Symmetric | 1 | 123 | 3.5086 | 3.9179 |
+| Symmetric | 1 | 456 | 3.5368 | 3.9113 |
+| LoRA | 2 | 42 | 3.4796 | 3.8465 |
+| LoRA | 2 | 123 | 3.4815 | 3.8514 |
+| LoRA | 2 | 456 | 3.4709 | 3.8497 |
+| Symmetric | 2 | 42 | 3.4081 | 3.8157 |
+| Symmetric | 2 | 123 | 3.4578 | 3.8444 |
+| Symmetric | 2 | 456 | 3.4361 | 3.8315 |
+| LoRA | 4 | 42 | 3.3533 | 3.7647 |
+| LoRA | 4 | 123 | 3.3541 | 3.7714 |
+| LoRA | 4 | 456 | 3.3375 | 3.7607 |
+| Symmetric | 4 | 42 | 3.3112 | 3.7439 |
+| Symmetric | 4 | 123 | 3.3089 | 3.7447 |
+| Symmetric | 4 | 456 | 3.3101 | 3.7402 |
+| LoRA | 8 | 42 | 3.3165 | 3.7348 |
+| LoRA | 8 | 123 | 3.3067 | 3.7329 |
+| LoRA | 8 | 456 | 3.2931 | 3.7280 |
+| Symmetric | 8 | 42 | 3.2469 | 3.6939 |
+| Symmetric | 8 | 123 | 3.2340 | 3.6894 |
+| Symmetric | 8 | 456 | 3.2529 | 3.6982 |
+
+AG News per-seed values come from
+`results/tables/downstream-ag-news/downstream_controlled_results.csv`:
+
+| Method | Seed | Test loss | Accuracy | Macro-F1 |
+|---|---:|---:|---:|---:|
+| LoRA | 42 | 0.6047 | 0.8143 | 0.8099 |
+| LoRA | 123 | 0.5294 | 0.8217 | 0.8177 |
+| LoRA | 456 | 0.4996 | 0.8242 | 0.8192 |
+| Symmetric | 42 | 0.5984 | 0.8195 | 0.8152 |
+| Symmetric | 123 | 0.9046 | 0.7747 | 0.7568 |
+| Symmetric | 456 | 0.5511 | 0.8122 | 0.8067 |
+
+The individual observations show why mean differences must be interpreted with
+their seed variability and why no significance claim is made from three seeds.
+
+## 18. References
+
+1. Hu, E. J., et al. (2022). *LoRA: Low-Rank Adaptation of Large Language Models.* ICLR. https://openreview.net/forum?id=nZeVKeeFYf9
+2. Vaswani, A., et al. (2017). *Attention Is All You Need.* NeurIPS. https://arxiv.org/abs/1706.03762
+3. Radford, A., et al. (2019). *Language Models are Unsupervised Multitask Learners.* OpenAI technical report.
+4. Merity, S., Xiong, C., Bradbury, J., and Socher, R. (2016). *Pointer Sentinel Mixture Models.* ICLR. https://arxiv.org/abs/1609.07843
+5. Li, Y., Song, L., and Hou, H. (2024). *LoRAN: Improved Low-Rank Adaptation by a Non-Linear Transformation.* Findings of EMNLP 2024. https://aclanthology.org/2024.findings-emnlp.177/
+6. Zhang, W., Mu, L., Ni, L., Jin, P., and Zhang, Y. (2026). *Polynomial Expansion Rank Adaptation: Enhancing Low-Rank Fine-Tuning with High-Order Interactions.* Findings of ACL 2026. https://aclanthology.org/2026.findings-acl.650/
+7. Liu, S.-Y., et al. (2024). *DoRA: Weight-Decomposed Low-Rank Adaptation.* ICML. https://proceedings.mlr.press/v235/liu24bn.html
+8. Jiang, T., et al. (2024). *MoRA: High-Rank Updating for Parameter-Efficient Fine-Tuning.* https://arxiv.org/abs/2405.12130
+9. Huang, Y., et al. (2025). *HiRA: Parameter-Efficient Hadamard High-Rank Adaptation.* ICLR. https://proceedings.iclr.cc/paper_files/paper/2025/hash/48c368f105e8145b945227b73255635a-Abstract-Conference.html
+10. Xu, Y., et al. (2026). *QuadraNet V2: Efficient and Sustainable Training of High-Order Neural Networks.* WACV. https://openaccess.thecvf.com/content/WACV2026/html/Xu_QuadraNet_V2_Efficient_and_Sustainable_Training_of_High-Order_Neural_Networks_WACV_2026_paper.html
+
+LoRAN applies a nonlinear transformation to a low-rank weight update, and PERA
+expands low-rank weight factors polynomially. Neither was an experimental
+baseline here. This study evaluates a quadratic dependence on the input
+activation at a frozen projection. Further verified metadata is maintained in
+`comparisons/papers/REFERENCES.md`.

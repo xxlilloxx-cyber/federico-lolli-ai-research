@@ -3,6 +3,7 @@
 **Author:** Federico Lolli
 
 **Contact:** xxlilloxx@gmail.com
+
 **Status:** independent exploratory research; no claim of peer review or
 universal superiority.
 
@@ -77,12 +78,17 @@ See [`REPOSITORY_STRUCTURE.md`](REPOSITORY_STRUCTURE.md) for the complete map.
 
 - Canonical technical report:
   [`research/paper/TECHNICAL_REPORT.md`](research/paper/TECHNICAL_REPORT.md).
+- Scientific manuscript:
+  [`research/paper/SCIENTIFIC_MANUSCRIPT.md`](research/paper/SCIENTIFIC_MANUSCRIPT.md)
+  with [LaTeX source](research/paper/SCIENTIFIC_MANUSCRIPT.tex).
 - Final evidence review:
   [`research/paper/FINAL_RESEARCH_REVIEW.md`](research/paper/FINAL_RESEARCH_REVIEW.md).
 - Reproduction guide:
   [`research/reproducibility/REPRODUCIBILITY.md`](research/reproducibility/REPRODUCIBILITY.md).
 - Model comparison:
   [`comparisons/MODEL_COMPARISON.md`](comparisons/MODEL_COMPARISON.md).
+- Publication-readiness review:
+  [`research/limitations/PUBLICATION_READINESS_REPORT.md`](research/limitations/PUBLICATION_READINESS_REPORT.md).
 - Static site: `docs/index.html`; intended project URL:
   <https://xxlilloxx-cyber.github.io/federico-lolli-ai-research/>.
 

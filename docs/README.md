@@ -1,8 +1,8 @@
 # Federico Lolli AI Research — GitHub Pages source
 
 This directory is the English GitHub Pages source for Federico Lolli's AI
-research archive. The site introduces Research Project 01, *Low-Rank Quadratic
-Adaptation of GPT-2*, and links its methods, results, references, and
+research archive. The site introduces Research Project 01, *Symmetric
+Quadratic Adaptation*, and links its methods, results, references, and
 reproducibility material.
 
 ## Local preview
@@ -11,7 +11,7 @@ From the repository root, mount `docs/` beneath the eventual project path:
 
 ```bash
 mkdir -p site-preview/base
-ln -s ../../../docs site-preview/base/federico-lolli-ai-research
+ln -s ../../docs site-preview/base/federico-lolli-ai-research
 python3 -m http.server 8000 --directory site-preview/base
 ```
 
@@ -26,6 +26,8 @@ Open `http://localhost:8000/federico-lolli-ai-research/`.
   the source and aggregation used for each public figure.
 - `data/TECHNICAL_REPORT.md` mirrors the canonical standalone report at
   `../research/paper/TECHNICAL_REPORT.md`.
+- `data/SCIENTIFIC_MANUSCRIPT.md` mirrors the canonical paper source; the
+  adjacent `.tex` file is its publication-oriented LaTeX version.
 - `../scripts/validation/validate_public_long_data.py` validates final
   endpoints, and `../scripts/figures/generate_public_long_figures.py`
   regenerates public figures from
@@ -33,7 +35,8 @@ Open `http://localhost:8000/federico-lolli-ai-research/`.
 
 ## Licences and attribution
 
-Original repository code is available under the [MIT License](../LICENSE).
-Original site text and original figures are available under [CC BY 4.0](../LICENSE-CONTENT.md).
+Original repository code is available under the [MIT License](https://github.com/xxlilloxx-cyber/federico-lolli-ai-research/blob/main/LICENSE).
+Original site text and original figures are available under [CC BY 4.0](https://github.com/xxlilloxx-cyber/federico-lolli-ai-research/blob/main/LICENSE-CONTENT.md).
 These terms do not relicense third-party software, pretrained GPT-2 weights,
-WikiText-2, cited papers, or linked external materials; see [NOTICE](../NOTICE.md).
+WikiText-2, cited papers, or linked external materials; see the
+[NOTICE](https://github.com/xxlilloxx-cyber/federico-lolli-ai-research/blob/main/NOTICE.md).

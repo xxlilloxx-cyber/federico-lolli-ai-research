@@ -16,4 +16,4 @@
 | Convergence reconstruction | DONE | fresh evaluations every 25 steps; selected checkpoints exported | validation uses existing eight-block protocol |
 | Controlled cost benchmark | DONE | 30 timed iterations after 10 warmups, rank 4 seed 42 | one device and batch/sequence configuration |
 | Technical/public report integration | DONE | final review and report appendices | exploratory release only |
-| Publication history safety | BLOCKED | `PUBLIC_RELEASE_AUDIT.md` | reachable local stash history remains; no destructive rewrite authorized |
+| Publication history safety | BLOCKED | `research/limitations/PUBLIC_RELEASE_AUDIT.md` | reachable local stash history remains; no destructive rewrite authorized |

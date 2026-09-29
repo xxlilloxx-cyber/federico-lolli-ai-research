@@ -19,6 +19,7 @@ python3 -m venv .venv
 ```bash
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PYTHONPATH=. .venv/bin/python -m pytest -q
 .venv/bin/python scripts/validation/validate_public_long_data.py
+.venv/bin/python tools/validate_publication.py
 ```
 
 ## Rebuild analyses without training
@@ -76,3 +77,17 @@ authoritative record for each executed cell and remain with ignored raw runs.
 Plot-only scripts read publication-safe CSVs where possible. Checkpoint-only
 mechanism analysis and the cost benchmark require the ignored final adapter
 checkpoints.
+
+## Build and preview the website
+
+```bash
+.venv/bin/python tools/build_public_site.py
+.venv/bin/python tools/validate_publication.py
+python -m http.server 8000 --directory docs
+```
+
+Open `http://localhost:8000/`. The deployed project base path is
+`/federico-lolli-ai-research/`; all site-local references are relative so the
+same files resolve under that prefix. `research/paper/SCIENTIFIC_MANUSCRIPT.md`
+is the canonical paper source and `docs/data/SCIENTIFIC_MANUSCRIPT.md` is its
+generated public mirror.

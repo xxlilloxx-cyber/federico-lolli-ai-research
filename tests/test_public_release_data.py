@@ -1,6 +1,8 @@
 """Regression tests for the sanitized public final-study evidence."""
 import csv
 from pathlib import Path
+import subprocess
+import sys
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -35,3 +37,7 @@ def test_canonical_report_uses_explicit_final_study_terms():
         "3.1925",
     ):
         assert term in report
+
+
+def test_static_publication_links_and_values():
+    subprocess.run([sys.executable, str(ROOT / "tools" / "validate_publication.py")], check=True)
