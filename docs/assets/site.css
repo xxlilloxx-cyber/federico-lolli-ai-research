@@ -46,7 +46,7 @@ h4 { margin: 1.1rem 0 .3rem; }
 .definition { display: grid; grid-template-columns: minmax(135px,210px) 1fr; gap: .4rem 1rem; padding: 1rem; border: 1px solid var(--line); background: #fff; }
 .definition dt { font-family: ui-monospace,SFMono-Regular,Menlo,monospace; font-weight: 700; }.definition dd { margin: 0; color: var(--muted); }
 .figure { margin: 2.15rem 0 2.7rem; }
-.figure img,.figure object { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.figure img,.figure object { display: block; width: 100%; max-width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
 .diagram { max-width: 1050px; margin-inline: auto; }
 .figure figcaption { margin-top: .65rem; color: var(--muted); font-size: .94rem; }
 .figure figcaption strong { color: var(--ink); }

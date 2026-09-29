@@ -40,6 +40,14 @@ Earlier exploratory branches used the implementation's outer $\alpha/r$ factor: 
 
 $$\Delta y=\frac{\alpha}{r}\left[\frac{\alpha_L}{r_L}(xA)B+\frac{\alpha_Q}{r_Q}((xU)\odot(xV))P\right].$$
 
+![Figure 1. Matched LoRA and Symmetric Quadratic adapter branches beside a frozen row-vector projection.](https://github.com/xxlilloxx-cyber/federico-lolli-ai-research/blob/main/results/figures/architecture/adapter_architecture_comparison.svg)
+
+**Figure 1.** Architecture of the matched LoRA and Symmetric Quadratic
+adapters. Both branches run beside the frozen $xW+b$ projection. The Symmetric
+branch applies the element-wise square $z\odot z$ to $z=xU$ before $P$; it does
+not use a matrix square. Each matched adapter contains $r(d+d_{out})$
+trainable parameters.
+
 ## 3. Architecture, data, and protocol
 
 The model is Hugging Face `gpt2` (GPT-2 Small, approximately 124M parameters, 12 zero-based blocks). In the final campaign an adapter receives the **input** to `transformer.h[L].attn.c_proj`: the concatenated causal-attention head output. The frozen `attn.c_proj` and trainable adapter run in parallel, their outputs are summed, GPT-2 applies its attention residual dropout, and the attention residual is added. The second normalization and MLP remain frozen. Block 2 means the third block.

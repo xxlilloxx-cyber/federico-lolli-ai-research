@@ -89,6 +89,14 @@ For the controlled rank study $\alpha=4$, making $\alpha/r$ equal to 4, 2, 1,
 and 0.5 for ranks 1, 2, 4, and 8. Rank, parameter count, and effective scale
 therefore change together in the primary factorial.
 
+![Figure 1. Matched LoRA and Symmetric Quadratic adapter branches beside a frozen row-vector projection.](https://github.com/xxlilloxx-cyber/federico-lolli-ai-research/blob/main/results/figures/architecture/adapter_architecture_comparison.svg)
+
+**Figure 1.** Architecture of the matched LoRA and Symmetric Quadratic
+adapters. Both add a low-rank trainable branch beside the frozen projection.
+LoRA applies two linear projections, whereas Symmetric inserts an element-wise
+square of the projected activation before the output projection, producing an
+activation-dependent quadratic correction.
+
 ## 4. Experimental methodology
 
 The backbone is frozen GPT-2 Small. Controlled rank experiments insert one
