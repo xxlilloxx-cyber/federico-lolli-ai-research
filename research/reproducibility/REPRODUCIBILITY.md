@@ -89,5 +89,14 @@ python -m http.server 8000 --directory docs
 Open `http://localhost:8000/`. The deployed project base path is
 `/federico-lolli-ai-research/`; all site-local references are relative so the
 same files resolve under that prefix. `research/paper/SCIENTIFIC_MANUSCRIPT.md`
-is the canonical paper source and `docs/data/SCIENTIFIC_MANUSCRIPT.md` is its
-generated public mirror.
+and `.tex` are the canonical paper sources. Build the PDF with:
+
+```bash
+cd research/paper
+tectonic SCIENTIFIC_MANUSCRIPT.tex
+cd ../..
+cp research/paper/SCIENTIFIC_MANUSCRIPT.{md,tex,pdf} docs/data/
+```
+
+The files under `docs/data/` are generated public mirrors; the project overview
+links to the compiled PDF.

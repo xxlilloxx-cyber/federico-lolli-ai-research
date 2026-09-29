@@ -3,7 +3,7 @@
   <desc id="desc">Original diagram comparing LoRA, the Symmetric Quadratic Adapter, PERA, QuadraNet V2, and a nonlinear bottleneck adapter. Frozen components are blue, trainable components orange, and fixed operations grey.</desc>
   <defs>
     <style>
-      .heading{font:700 28px sans-serif;fill:#17213a}.label{font:600 19px sans-serif;fill:#17213a}.small{font:15px sans-serif;fill:#25304a}.eq{font:17px monospace;fill:#17213a}.panel{fill:#fafbfe;stroke:#cad2e3;stroke-width:2}.frozen{fill:#d9e8ff;stroke:#3d6fa8;stroke-width:2}.train{fill:#ffe0b7;stroke:#b56712;stroke-width:2}.op{fill:#eceff4;stroke:#687386;stroke-width:2}.sum{fill:#fff;stroke:#17213a;stroke-width:2}.arrow{stroke:#313d55;stroke-width:2.5;fill:none;marker-end:url(#arrow)}
+      .heading{font:700 28px sans-serif;fill:#17213a}.label{font:600 18px sans-serif;fill:#17213a}.small{font:14px sans-serif;fill:#25304a}.eq{font:17px monospace;fill:#17213a}.panel{fill:#fafbfe;stroke:#cad2e3;stroke-width:2}.frozen{fill:#d9e8ff;stroke:#3d6fa8;stroke-width:2}.train{fill:#ffe0b7;stroke:#b56712;stroke-width:2}.op{fill:#eceff4;stroke:#687386;stroke-width:2}.sum{fill:#fff;stroke:#17213a;stroke-width:2}.arrow{stroke:#313d55;stroke-width:2.5;fill:none;marker-end:url(#arrow)}
     </style>
     <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#313d55"/></marker>
   </defs>
@@ -33,7 +33,7 @@
   <rect x="40" y="365" width="660" height="250" rx="18" class="panel"/>
   <text x="70" y="402" class="label">PERA — polynomial expansion in parameter-factor space</text>
   <rect x="75" y="455" width="95" height="55" rx="10" class="op"/><text x="122" y="489" text-anchor="middle" class="eq">A, B</text>
-  <rect x="220" y="440" width="215" height="85" rx="10" class="train"/><text x="327" y="475" text-anchor="middle" class="small">factor polynomial</text><text x="327" y="501" text-anchor="middle" class="eq">original + square + cross</text>
+  <rect x="220" y="440" width="215" height="85" rx="10" class="train"/><text x="327" y="475" text-anchor="middle" class="small">factor polynomial</text><text x="327" y="501" text-anchor="middle" class="small">original + square + cross</text>
   <rect x="485" y="455" width="150" height="55" rx="10" class="train"/><text x="560" y="489" text-anchor="middle" class="eq">construct ΔW</text>
   <path d="M170 482 L220 482" class="arrow"/><path d="M435 482 L485 482" class="arrow"/>
   <text x="75" y="560" class="small">The polynomial is built from trainable factors, not from the current x.</text>
@@ -46,7 +46,7 @@
   <rect x="925" y="515" width="245" height="55" rx="10" class="train"/><text x="1047" y="549" text-anchor="middle" class="eq">xᵀ Waᵀ Wb x</text>
   <circle cx="1270" cy="480" r="27" class="sum"/><text x="1270" y="487" text-anchor="middle" class="label">+</text>
   <path d="M870 482 L900 482 L900 452 L925 452" class="arrow"/><path d="M870 482 L900 482 L900 542 L925 542" class="arrow"/><path d="M1080 452 L1243 474" class="arrow"/><path d="M1170 542 L1252 504" class="arrow"/>
-  <text x="775" y="590" class="small">Closest quadratic-form precedent; vision-specific sharing and placement differ.</text>
+  <text x="775" y="586" class="small">Closely related quadratic-form precedent; sharing and placement differ.</text>
 
   <rect x="390" y="655" width="660" height="250" rx="18" class="panel"/>
   <text x="420" y="692" class="label">Nonlinear bottleneck adapter — general added module</text>
@@ -55,6 +55,7 @@
   <rect x="750" y="760" width="105" height="55" rx="10" class="op"/><text x="802" y="794" text-anchor="middle" class="eq">φ(·)</text>
   <rect x="905" y="760" width="105" height="55" rx="10" class="train"/><text x="957" y="794" text-anchor="middle" class="eq">up(·)</text>
   <path d="M520 787 L570 787" class="arrow"/><path d="M700 787 L750 787" class="arrow"/><path d="M855 787 L905 787" class="arrow"/>
-  <text x="425" y="858" class="small">A nonlinear bottleneck is broader in activation choice, but does not impose Qj=U diag(pj) Uᵀ.</text>
+  <text x="425" y="850" class="small">A nonlinear bottleneck allows a general activation choice; it does not impose</text>
+  <text x="425" y="873" class="small">the shared symmetric form Qj = U diag(pj) Uᵀ.</text>
   <rect x="420" y="925" width="24" height="18" class="frozen"/><text x="455" y="940" class="small">frozen</text><rect x="535" y="925" width="24" height="18" class="train"/><text x="570" y="940" class="small">trainable</text><rect x="680" y="925" width="24" height="18" class="op"/><text x="715" y="940" class="small">fixed operation</text>
 </svg>

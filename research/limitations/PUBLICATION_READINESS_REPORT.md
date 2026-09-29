@@ -22,7 +22,8 @@ release, or history rewrite was performed.
 
 ## Canonical publication artifacts
 
-- Manuscript: `research/paper/SCIENTIFIC_MANUSCRIPT.md`
+- Manuscript sources: `research/paper/SCIENTIFIC_MANUSCRIPT.md` and `.tex`
+- Compiled manuscript: `research/paper/SCIENTIFIC_MANUSCRIPT.pdf`
 - LaTeX source: `research/paper/SCIENTIFIC_MANUSCRIPT.tex`
 - Extended report: `research/paper/TECHNICAL_REPORT.md`
 - Evidence review: `research/paper/FINAL_RESEARCH_REVIEW.md`
@@ -31,8 +32,8 @@ release, or history rewrite was performed.
 - Sanitized data and figures: `results/`
 - Generated public mirrors and website: `docs/`
 
-No PDF was compiled because no LaTeX compiler or Pandoc executable is installed
-in the local toolchain. The verified Markdown and LaTeX sources are available.
+The manuscript PDF is built from the canonical LaTeX source with the
+user-local Tectonic toolchain and mirrored into `docs/data/` for the website.
 
 ## Claim and unit audit
 

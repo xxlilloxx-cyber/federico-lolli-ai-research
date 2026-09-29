@@ -5,7 +5,7 @@
     <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0 0L10 4L0 8Z" fill="#28445f"/></marker>
     <style>
       .title{font:700 29px system-ui,sans-serif;fill:#15233c}.sub{font:500 17px system-ui,sans-serif;fill:#526176}
-      .label{font:600 18px system-ui,sans-serif;fill:#15233c}.small{font:500 15px system-ui,sans-serif;fill:#526176}
+      .label{font:600 18px system-ui,sans-serif;fill:#15233c}.small{font:500 14px system-ui,sans-serif;fill:#526176}
       .math{font:600 20px ui-monospace,monospace;fill:#15233c}.frozen{fill:#e9eef5;stroke:#60758d;stroke-width:2}
       .trainL{fill:#e8f3ff;stroke:#1266b2;stroke-width:2}.trainQ{fill:#fff0e6;stroke:#c45716;stroke-width:2}
       .sum{fill:#fff;stroke:#28445f;stroke-width:2}.wire{fill:none;stroke:#28445f;stroke-width:2.4;marker-end:url(#arrow)}

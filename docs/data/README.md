@@ -4,8 +4,8 @@ These are publication-safe Pages mirrors of the canonical exports under
 `results/tables/`. They contain no local paths, checkpoint payloads, logs, or
 machine diagnostics and must not be edited independently.
 
-`TECHNICAL_REPORT.md`, `SCIENTIFIC_MANUSCRIPT.md`, and
-`SCIENTIFIC_MANUSCRIPT.tex` are generated mirrors of canonical sources under
+`TECHNICAL_REPORT.md`, `SCIENTIFIC_MANUSCRIPT.md`, `SCIENTIFIC_MANUSCRIPT.tex`,
+and `SCIENTIFIC_MANUSCRIPT.pdf` are generated mirrors of canonical sources under
 `research/paper/`. Edit the canonical sources and synchronize the mirrors.
 
 * `long_final_per_seed.csv` has one row for each of the 18 completed runs.
