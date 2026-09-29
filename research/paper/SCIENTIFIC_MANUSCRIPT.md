@@ -203,6 +203,33 @@ uniform and remain separate from the controlled evidence.
 | Scaling ablation | Fixed $\alpha=4$ versus $\alpha/r=1$, seed 42 | Exploratory scale check |
 | Mechanism and cost | Stored checkpoints and matched rank-4 benchmark | Structural and practical characterization |
 
+The two principal controlled protocols are consolidated below. The independent
+1,000-step rank screen is a separate campaign and is not the first segment of
+the 5,000-step confirmation trajectories.
+
+| Setting | WikiText-2 confirmation | AG News |
+|---|---|---|
+| Backbone | GPT-2 Small, frozen | GPT-2 Small, frozen |
+| Adapter placement | Block 0 `attn.c_proj` | Block 0 `attn.c_proj` |
+| Objective | Causal language modelling | Classification |
+| Sequence length | 128 tokens | 128 tokens |
+| Training data | 36,718 packed blocks | 4,096 examples |
+| Validation | 3,760 packed blocks; eight-block evaluation limit | 1,000-example stratified subset |
+| Test | Held-out WikiText-2 test; 2,213 evaluated blocks | Original AG News test split |
+| Methods | LoRA, Symmetric | LoRA, Symmetric |
+| Rank(s) | 1, 2, 4, 8 | 4 |
+| Seeds | 42, 123, 456 | 42, 123, 456 |
+| Optimizer / learning rate | AdamW / $3\times10^{-4}$ | AdamW / $3\times10^{-4}$ |
+| Batch / accumulation | 1 / 4 | 1 / 4 |
+| Gradient clipping | 1.0 | 1.0 |
+| Scheduler | None | None |
+| Adapter scale | $\alpha=4$ | $\alpha=4$ |
+| Training steps | 5,000 | 500 |
+| Trainable parameters | Rank dependent; matched by method | 9,216 including classifier |
+
+**Table 3. Controlled experimental protocols.** Fields are taken from the
+recorded publication-safe configurations.
+
 The controlled WikiText-2 experiments freeze GPT-2 Small and insert one adapter
 beside the input of zero-based block 0 `attn.c_proj`. The frozen projection and
 adapter run in parallel; their outputs are summed before attention residual
@@ -412,13 +439,136 @@ scales.
 
 ## 9. Discussion
 
-The results establish that the quadratic adapter trains stably at small budgets
-and can outperform matched LoRA on controlled WikiText-2 language modelling.
-They also show that this ordering is task dependent. The derivative analyses
-verify a structural difference but do not isolate its causal contribution.
-Rank, effective scale, and optimization duration jointly qualify the observed
-ordering. The matched cost result shows that the added operation is practical
-in this implementation, without establishing cost at other scales.
+The controlled experiments reveal a more nuanced picture than a simple ranking
+between LoRA and Symmetric Quadratic Adaptation. The central WikiText-2
+confirmation provides consistent evidence in favor of the quadratic adapter
+under the tested language-modeling protocol, whereas the AG News classification
+experiment reverses that ordering. The main interpretation of the study is
+therefore not that one adapter dominates the other, but that the functional
+form of a low-rank correction can materially affect behavior and that this
+effect depends on the task, rank, scaling policy, and optimization regime.
+
+### 9.1 WikiText-2 result and rank dependence
+
+The strongest evidence comes from the independent 5,000-step WikiText-2
+confirmation campaign. Across ranks 1, 2, 4, and 8, Symmetric achieves lower
+mean final validation loss and lower mean held-out test loss than the matched
+LoRA baseline. All twelve paired seed-rank held-out comparisons also show lower
+loss for Symmetric under this protocol.
+
+The mean held-out test difference increases across the tested ranks, from
+approximately -0.0125 at rank 1 to -0.0381 at rank 8. This shows that the
+observed difference is not confined to a single rank. Nevertheless, the
+present experiments do not establish why the magnitude changes with rank.
+Under the primary protocol, increasing rank changes both the adapter capacity
+and the effective scale $\alpha/r$, so rank alone cannot be treated as the sole
+causal variable.
+
+The appropriate interpretation is therefore configuration specific: the
+Symmetric functional form is useful in the tested GPT-2 Small, WikiText-2,
+block-0 `attn.c_proj` setting. The experiment does not establish that quadratic
+adaptation must outperform linear adaptation for language modeling in general.
+
+### 9.2 Optimization dynamics
+
+The convergence analysis shows that training duration can materially change
+the comparison. Rank 1 is particularly informative. LoRA has lower mean
+validation loss at the earlier recorded checkpoints, but the ordering changes
+between the 2,000- and 3,000-step evaluations. Symmetric subsequently maintains
+the lower mean validation loss through the final 5,000-step checkpoint. A
+comparison terminated earlier could therefore have produced a different
+conclusion.
+
+Ranks 2, 4, and 8 follow a different trajectory. Symmetric already has lower
+mean validation loss at the recorded 1,000-step point. At ranks 4 and 8,
+however, the magnitude of the difference narrows later in training. These
+trajectories show that adapter comparisons should not be interpreted
+independently of optimization duration. They do not establish asymptotic
+behavior, because the study observes only the finite schedules that were
+actually executed.
+
+### 9.3 Scaling and rank
+
+The main rank experiment fixes $\alpha$ at 4, so $\alpha/r$ decreases as rank
+increases. The constant-scale ablation tests whether this scaling rule alone
+accounts for the observed rank pattern. With $\alpha/r$ fixed to 1, the
+qualitative 1,000-step pattern remains unchanged for seed 42: LoRA performs
+better at rank 1, while Symmetric performs better at ranks 2, 4, and 8.
+
+The magnitude does change. At rank 8, for example, the
+Symmetric-minus-LoRA validation-loss difference changes from -0.1177 under the
+primary scaling policy to -0.0975 under constant effective scale. This
+indicates that scaling contributes to the magnitude of the observed difference
+but does not, for the tested seed, fully explain the rank-dependent sign
+pattern. Because the constant-scale experiment was performed for only one
+seed, it cannot establish a general rank-scaling relationship.
+
+### 9.4 Task dependence and AG News
+
+AG News provides an important counterexample to the WikiText-2 result. Under
+the matched classification protocol, LoRA achieves higher mean test accuracy,
+higher macro-F1, and lower test loss. Symmetric also shows substantially
+greater seed-to-seed variability.
+
+The two experimental settings differ in several respects. WikiText-2 is a
+causal language-modeling task, whereas AG News is classification and introduces
+a trainable classification head. The datasets, objectives, and training
+budgets also differ. The present experiments do not isolate which of these
+factors causes the reversed ordering. The defensible conclusion is therefore
+that the relative benefit of the quadratic correction is task and protocol
+dependent. This negative counter-result is scientifically important because it
+prevents the positive WikiText-2 result from being interpreted as evidence of
+universal superiority.
+
+### 9.5 Structural interpretation
+
+The derivative analyses establish that LoRA and Symmetric belong to different
+local function classes. LoRA is linear with respect to the adapter input. Its
+Jacobian is input independent and its adapter-only Hessian is exactly zero. Its
+correction can therefore be represented by a single fixed low-rank update.
+Symmetric has an input-dependent local Jacobian and an explicit non-zero
+adapter-only second derivative. Its effective local transformation changes
+with the incoming activation and cannot, in general, be reduced to one constant
+$\Delta W$.
+
+The effective rank of the LoRA update, the effective rank of the Symmetric
+local Jacobian, the ranks of $U$ and $P$, and the output-covariance rank describe
+different mathematical objects. They should not be interpreted as
+interchangeable measurements of one underlying “weight rank.” These structural
+results demonstrate that the quadratic adapter has a different functional
+form, but they do not establish that Jacobian variability, Hessian magnitude,
+or any measured spectral property causes the observed WikiText-2 improvement.
+Establishing such a causal relationship would require additional
+intervention-based analysis.
+
+### 9.6 Computational implications
+
+The matched rank-4 benchmark shows that the explicit quadratic operation
+introduces little measured practical cost in the tested configuration. Forward
+latency differs from LoRA by approximately +0.22%, backward latency by
+approximately -0.27%, peak allocated VRAM increases by about 1.25 MiB, and
+forward throughput remains nearly unchanged.
+
+This indicates that, in this implementation and hardware configuration, the
+element-wise square can be introduced without a substantial measured
+computational penalty. The benchmark should not be generalized to larger
+models, higher ranks, longer sequences, larger batches, or different
+accelerators without additional measurement.
+
+### 9.7 Overall interpretation
+
+Taken together, the experiments support the view that adapter functional form
+is an important design variable alongside rank and parameter count. Two
+adapters with matched trainable matrix shapes and parameter budgets can
+implement substantially different local transformations and can produce
+different empirical behavior across tasks and optimization regimes.
+
+Within the controlled WikiText-2 study, Symmetric Quadratic Adaptation provides
+a consistent advantage over the matched LoRA baseline. The AG News experiment
+demonstrates that this advantage does not automatically transfer to another
+task. The evidence therefore supports Symmetric Quadratic Adaptation as a
+viable task-dependent alternative to LoRA while leaving open the broader
+question of when quadratic activation-space interactions are most useful.
 
 ![Figure 9. Architectural context for related methods.](https://github.com/xxlilloxx-cyber/federico-lolli-ai-research/blob/main/docs/assets/figures/adapter-family-comparison.svg)
 
@@ -428,13 +578,101 @@ not imply mathematical equivalence.
 
 ## 10. Limitations
 
-The study is limited to GPT-2 Small, two datasets, restricted placements,
-three seeds for central experiments, one seed for the scaling ablation, and no
-exhaustive hyperparameter sweep. Related methods except LoRA were not
-experimentally reproduced. There is no full-block Hessian, and the cost
-benchmark covers one rank, device, batch size, and sequence length. The work
-does not establish universal mathematical novelty over all prior quadratic
-architectures.
+This study was designed to provide controlled evidence about one specific
+quadratic low-rank adapter formulation rather than a complete benchmark of
+parameter-efficient fine-tuning. Several limitations therefore constrain the
+generality of the conclusions.
+
+### 10.1 Model scope
+
+The controlled experiments use GPT-2 Small. The results do not establish that
+the same behavior will occur in larger GPT-2 variants, other decoder-only
+language models, encoder architectures, vision Transformers, or multimodal
+systems. Model scale and architecture may alter optimization dynamics,
+representation geometry, memory behavior, and the usefulness of explicit
+quadratic interactions. Replication across additional model families is
+required before drawing broader architectural conclusions.
+
+### 10.2 Task and dataset scope
+
+The main controlled evidence comes from two datasets with different
+objectives: WikiText-2 causal language modeling and AG News classification.
+The reversed ordering between these tasks demonstrates that task dependence
+matters, but two datasets are insufficient to characterize the conditions
+under which quadratic activation-space adaptation is beneficial. Additional
+generative, classification, reasoning, and domain-specific tasks would be
+required to establish broader transfer behavior.
+
+### 10.3 Experimental scope
+
+The central WikiText-2 comparison uses three seeds, four ranks, one primary
+controlled adapter placement, one optimizer family, and a fixed training
+schedule. Three seeds provide repeated evidence but remain a small basis for
+broad statistical inference. The study therefore reports means, sample
+standard deviations, and paired differences without claiming general
+statistical significance over a larger population of training runs.
+
+The principal controlled placement is zero-based block 0 `attn.c_proj`.
+Earlier placement and multilayer studies provide exploratory context, but they
+do not constitute a fully controlled evaluation of every Transformer layer
+and projection.
+
+### 10.4 Scaling and hyperparameters
+
+The main rank study fixes $\alpha$ at 4, causing $\alpha/r$ to vary with rank.
+The constant-scale ablation examines this issue only for seed 42. The result
+therefore suggests that scaling alone does not explain the observed rank
+pattern for that seed, but it does not provide a complete multi-seed
+characterization of the interaction between rank and scale.
+
+The study also does not perform an exhaustive independent hyperparameter
+optimization for each adapter. Alternative learning rates, schedules,
+initialization policies, regularization settings, or scales could alter the
+relative behavior.
+
+### 10.5 Mechanistic interpretation
+
+The Jacobian and Hessian analyses establish analytical and measured structural
+differences between LoRA and Symmetric, but they do not demonstrate that these
+differences cause the WikiText-2 performance gap. The adapter-only Hessian is
+analytically tractable. A full Transformer-block Hessian was not evaluated
+because it would require a separate scalar-reduction protocol and substantially
+greater computational complexity. More detailed intervention studies would be
+needed to connect local second-order structure directly to task performance.
+
+### 10.6 Computational-cost scope
+
+The computational benchmark covers one rank-4 configuration with batch size 1,
+sequence length 128, and one recorded hardware/software environment. The
+near-equal latency and small memory difference observed here should therefore
+be interpreted as an implementation-specific measurement, not as a universal
+statement about computational efficiency. Scaling behavior for larger models,
+higher ranks, longer sequences, larger batches, and different accelerators
+remains unmeasured.
+
+### 10.7 Related-work scope
+
+LoRA is the only related method reproduced as a direct controlled baseline.
+DoRA, MoRA, HiRA, LoRAN, PERA, QuadraNet V2, and nonlinear adapter methods are
+used to establish mathematical and architectural context, not as
+experimentally reproduced comparisons under the same protocol. Published
+results from those works are therefore not directly compared numerically with
+the present experiments.
+
+The literature review also does not establish universal mathematical novelty
+relative to every prior quadratic neural architecture. The contribution should
+instead be understood as the formulation, controlled evaluation, and
+structural characterization of this specific activation-space quadratic
+adapter.
+
+### 10.8 Generalization
+
+The results establish reproducible behavior within the tested conditions. They
+do not establish state-of-the-art performance, universal superiority over
+LoRA, broad transfer across model families, or a general causal advantage of
+second-order adaptation. Broader replication across larger models, additional
+tasks, additional placements, and independently repeated scaling conditions is
+required to determine how widely the observed behavior generalizes.
 
 ## 11. Conclusion
 
@@ -523,6 +761,78 @@ work across larger models, additional tasks, broader placements, and
 independently replicated scaling configurations can determine whether the
 advantages observed here represent a broader property of activation-space
 quadratic adaptation or a characteristic of the specific regimes studied.
+
+## Appendix B. Historical evidence
+
+The historical experiments preceded the final controlled protocols and were
+used to explore adapter formulation, training duration, placement, and
+distribution of a fixed parameter budget across layers. Because these campaigns
+were not conducted under one uniform protocol, they are reported here as
+exploratory evidence and are not pooled with the controlled rank-confirmation
+or AG News results.
+
+### B.1 Adapter-family exploration
+
+| Adapter | Mean best-recorded validation loss |
+|---|---:|
+| LoRA | 3.5732 |
+| Element-wise quadratic | 3.6351 |
+| Signed quadratic | 3.6257 |
+| Interaction | 3.5581 |
+| Symmetric | 3.5526 |
+| Linear+Quadratic | 3.5302 |
+
+**Historical 500-step adapter-family screen.** Values are verified three-seed
+means of best-recorded validation loss. These exploratory runs are not a
+matched final benchmark.
+
+### B.2 Longer exploratory training
+
+| Steps | LoRA | Symmetric | Linear+Quadratic |
+|---:|---:|---:|---:|
+| 1,000 | 3.5491 | 3.4770 | 3.4928 |
+| 2,000 | 3.4598 | 3.3784 | 3.4360 |
+
+**Historical rank-4 block-0 insertion-point summaries.** Values are verified
+three-seed means of best-recorded validation loss. They are not final-checkpoint
+test results.
+
+### B.3 Placement and depth exploration
+
+A seed-42, 20-step attention scan evaluated all twelve GPT-2 blocks. Symmetric
+recorded lower validation loss at 11 of 12 blocks; block 1 was the exception.
+At block 2, the largest short-run separation was 3.8243 for LoRA versus 3.8030
+for Symmetric. Separate attention-versus-MLP screens found nearly tied
+single-module MLP results, while the combined block-0 MLP branch used 15,360
+parameters and therefore was not directly budget matched to the 6,144-parameter
+attention branches. These short screens established that placement merited
+further control; they do not define a stable depth ranking.
+
+### B.4 Fixed-budget multilayer exploration
+
+| Budget | Geometry | Local rank | LoRA | Symmetric |
+|---:|---|---:|---:|---:|
+| 6,144 | Concentrated [2] | 4 | 3.5039 | 3.3745 |
+| 6,144 | Two layers [0,11] | 2 | 3.3661 | 3.3730 |
+| 6,144 | Four layers [0,3,7,11] | 1 | 3.3199 | 3.3794 |
+| 12,288 | Concentrated [2] | 8 | 3.5013 | 3.3391 |
+| 12,288 | Two layers [0,11] | 4 | 3.3157 | 3.2390 |
+| 12,288 | Four layers [0,3,7,11] | 2 | 3.2578 | 3.2356 |
+
+**Historical fixed-budget multilayer study.** Values are verified three-seed
+means of best-recorded validation loss after 2,000-step runs. Distributing a
+fixed budget changes both placement and local rank, so these results are not
+merged with the later single-placement rank-confirmation experiment.
+
+### B.5 Role of the historical experiments
+
+These exploratory campaigns served to identify promising adapter structures
+and experimental questions. They motivated the later controlled studies but do
+not carry the same evidential weight because their protocols differ in
+placement, duration, rank allocation, or evaluation definition. The central
+conclusions of this manuscript are therefore based on the controlled
+WikiText-2 confirmation, AG News classification, scaling, convergence,
+mechanism, and computational-cost experiments.
 
 ## References
 

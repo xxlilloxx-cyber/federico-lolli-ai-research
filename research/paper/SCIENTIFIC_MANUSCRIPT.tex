@@ -3,6 +3,10 @@
 \usepackage{amsmath,amssymb,booktabs,graphicx,hyperref,microtype,array,enumitem,caption,placeins,xcolor}
 \setlength{\emergencystretch}{2em}\setlength{\parindent}{0pt}\setlength{\parskip}{0.5em}
 \captionsetup{font=small,labelfont=bf}
+\setcounter{topnumber}{3}\setcounter{bottomnumber}{2}\setcounter{totalnumber}{5}
+\renewcommand{\topfraction}{.9}\renewcommand{\bottomfraction}{.8}
+\renewcommand{\textfraction}{.08}\renewcommand{\floatpagefraction}{.78}
+\raggedbottom
 \graphicspath{{figures/}{../../docs/assets/publication/}}
 \hypersetup{colorlinks=true,linkcolor=blue!45!black,citecolor=blue!45!black,urlcolor=blue!55!black,pdftitle={Symmetric Factorized Quadratic Adaptation: A Controlled Study of Nonlinear Low-Rank Adapters for GPT-2},pdfauthor={Federico Lolli},pdfsubject={Parameter-efficient fine-tuning and quadratic low-rank adaptation},pdfkeywords={LoRA, PEFT, quadratic adaptation, GPT-2, low-rank adaptation, Transformers, parameter-efficient fine-tuning}}
 \newcommand{\sym}{\textsc{Symmetric}}\newcommand{\lora}{\textsc{LoRA}}
@@ -93,6 +97,30 @@ Scaling ablation&$\alpha=4$ versus $\alpha/r=1$, seed 42&Scale check\\
 Mechanism/cost&Stored checkpoints; matched rank-4 benchmark&Structure/cost\\\bottomrule
 \end{tabular}\end{table}
 
+Table~\ref{tab:protocols} consolidates the two principal controlled protocols. The independent 1,000-step rank screen is a separate campaign and is not the first segment of the 5,000-step confirmation trajectories.
+\begin{table}[tbp]\centering\scriptsize
+\caption{Controlled experimental protocols. Fields are taken from the recorded publication-safe configurations.}\label{tab:protocols}
+\begin{tabular}{p{.22\linewidth}p{.34\linewidth}p{.34\linewidth}}\toprule
+Setting&WikiText-2 confirmation&AG News\\\midrule
+Backbone&GPT-2 Small, frozen&GPT-2 Small, frozen\\
+Placement&Block 0 \texttt{attn.c\_proj}&Block 0 \texttt{attn.c\_proj}\\
+Objective&Causal language modelling&Classification\\
+Sequence length&128 tokens&128 tokens\\
+Training data&36,718 packed blocks&4,096 examples\\
+Validation&3,760 packed blocks; eight-block evaluation limit&1,000-example stratified subset\\
+Test&Held-out WikiText-2 test; 2,213 evaluated blocks&Original AG News test split\\
+Methods&\lora{}, \sym{}&\lora{}, \sym{}\\
+Rank(s)&1, 2, 4, 8&4\\
+Seeds&42, 123, 456&42, 123, 456\\
+Optimizer / learning rate&AdamW / $3\times10^{-4}$&AdamW / $3\times10^{-4}$\\
+Batch / accumulation&1 / 4&1 / 4\\
+Gradient clipping&1.0&1.0\\
+Scheduler&None&None\\
+Adapter scale&$\alpha=4$&$\alpha=4$\\
+Training steps&5,000&500\\
+Trainable parameters&Rank dependent; matched by method&9,216 including classifier\\\bottomrule
+\end{tabular}\end{table}\FloatBarrier
+
 \subsection{Historical exploration} Early adapter-family studies, 500/1,000/2,000-step durations, attention and MLP screens, a 12-block attention scan, and fixed-budget multilayer designs established trainability and motivated later controls. Their nonuniform protocols remain separate; Appendix~\ref{app:history} summarizes verified values.
 
 \subsection{Controlled WikiText-2 protocol} GPT-2 Small is frozen. WikiText-2 is packed into consecutive 128-token blocks for causal cross-entropy. Runs use block 0 \texttt{attn.c\_proj}, batch 1, accumulation 4, AdamW at $3\times10^{-4}$, clipping 1.0, no scheduler, $\alpha=4$, ranks 1/2/4/8, seeds 42/123/456, and 5,000 steps. The 1,000-step screen is independent. Best recorded validation, exact final validation, and final-checkpoint held-out test are distinct; test data select nothing.
@@ -114,7 +142,7 @@ Table~\ref{tab:rank} reports final-checkpoint means and sample SD. Lower is bett
 4&$3.3483\pm0.0093$&$3.3101\pm0.0011$&$3.7656\pm0.0054$&$3.7429\pm0.0024$\\
 8&$3.3054\pm0.0117$&$3.2446\pm0.0096$&$3.7319\pm0.0035$&$3.6938\pm0.0044$\\\bottomrule\end{tabular}\end{table}
 Paired test differences (\sym{} minus \lora{}) are $-0.0125\pm0.0051$, $-0.0187\pm0.0119$, $-0.0227\pm0.0035$, and $-0.0381\pm0.0072$ at ranks 1,2,4,8; all 12 pairs favour \sym{}. Figure~\ref{fig:rank} shows individual seeds and SD. This result is specific to the tested task, placement, schedule, and scale.
-\begin{figure}[ht]\centering\includegraphics[width=.82\textwidth]{rank_5000_final_test_loss.pdf}
+\begin{figure}[tbp]\centering\includegraphics[width=.82\textwidth]{rank_5000_final_test_loss.pdf}
 \caption{Held-out WikiText-2 test loss after 5,000 steps at ranks 1,2,4,8. Lower is better. Points are seeds; markers/error bars are mean/sample SD. \sym{} is lower on average at every rank in this protocol.}\label{fig:rank}\end{figure}
 
 \subsection{AG News}
@@ -123,7 +151,7 @@ Paired test differences (\sym{} minus \lora{}) are $-0.0125\pm0.0051$, $-0.0187\
 \lora{}&$0.8201\pm0.0051$&$0.8156\pm0.0050$&$0.5445\pm0.0542$\\
 \sym{}&$0.8021\pm0.0240$&$0.7929\pm0.0315$&$0.6847\pm0.1919$\\\bottomrule\end{tabular}\end{table}
 \lora{} is better on average for all three measures. Figure~\ref{fig:ag} exposes the larger \sym{} seed variability, demonstrating that the WikiText-2 ordering does not transfer automatically.
-\begin{figure}[ht]\centering\includegraphics[width=.72\textwidth]{downstream_accuracy_comparison.pdf}
+\begin{figure}[tbp]\centering\includegraphics[width=.72\textwidth]{downstream_accuracy_comparison.pdf}
 \caption{AG News held-out accuracy. Bars/error bars are mean/sample SD; black points show all seeds. \lora{} is higher on average.}\label{fig:ag}\end{figure}
 
 \FloatBarrier\section{Scaling and convergence}\label{sec:scaling}
@@ -132,7 +160,7 @@ Paired test differences (\sym{} minus \lora{}) are $-0.0125\pm0.0051$, $-0.0187\
 \begin{tabular}{rccc@{\hspace{1em}}ccc}\toprule&\multicolumn{3}{c}{$\alpha=4$}&\multicolumn{3}{c}{$\alpha/r=1$}\\Rank&\lora{}&\sym{}&$\Delta$&\lora{}&\sym{}&$\Delta$\\\midrule
 1&3.6171&3.6614&+.0443&3.6301&3.6711&+.0410\\2&3.5861&3.5561&-.0300&3.5984&3.5693&-.0292\\4&3.5530&3.4780&-.0750&3.5530&3.4780&-.0750\\8&3.5492&3.4315&-.1177&3.5056&3.4081&-.0975\\\bottomrule\end{tabular}\end{table}
 The sign pattern persists for seed 42 while magnitude changes (Figure~\ref{fig:scale}); one seed prevents broader inference.
-\begin{figure}[ht]\centering\includegraphics[width=.8\textwidth]{rank_scaling_ablation_loss.pdf}
+\begin{figure}[tbp]\centering\includegraphics[width=.8\textwidth]{rank_scaling_ablation_loss.pdf}
 \caption{Single-seed scaling ablation. Fixed $\alpha$ changes effective scale with rank; the comparison fixes $\alpha/r=1$.}\label{fig:scale}\end{figure}
 
 \subsection{Fresh confirmation trajectories}
@@ -140,7 +168,7 @@ The sign pattern persists for seed 42 while magnitude changes (Figure~\ref{fig:s
 \begin{tabular}{rccccc}\toprule Rank&1,000&2,000&3,000&4,000&5,000\\\midrule
 1&+.0280&+.0096&-.0043&-.0265&-.0419\\2&-.0367&-.0432&-.0319&-.0311&-.0434\\4&-.0707&-.0631&-.0803&-.0635&-.0382\\8&-.1247&-.1156&-.0947&-.0781&-.0608\\\bottomrule\end{tabular}\end{table}
 Negative favours \sym{}. Rank 1 crosses between 2,000 and 3,000 recorded steps; ranks 2--8 favour \sym{} at every listed point. The independent screen is not joined to these curves. Figure~\ref{fig:conv} shows rank 1 and SD; no asymptotic claim is made.
-\begin{figure}[ht]\centering\includegraphics[width=.82\textwidth]{convergence_rank1.pdf}
+\begin{figure}[tbp]\centering\includegraphics[width=.82\textwidth]{convergence_rank1.pdf}
 \caption{Fresh rank-1 validation trajectories in the 5,000-step confirmation. Curves are means; bands are sample SD.}\label{fig:conv}\end{figure}
 
 \FloatBarrier\section{Mechanism analysis}
@@ -155,14 +183,14 @@ Entropy effective rank is $\exp(-\sum_i p_i\log p_i)$ for normalized singular va
 \begin{tabular}{rccccc}\toprule Rank&\lora{} update&\sym{} Jacobian&$U$&$P$&Output cov.\\\midrule
 1&1.00&1.00&1.00&1.00&1.00\\2&1.92&1.67&2.00&1.98&1.92\\4&3.76&3.09&3.99&3.89&3.00\\8&6.57&5.59&7.96&7.28&3.59\\\bottomrule\end{tabular}\end{table}
 The \sym{} local-Jacobian rank is not a fixed weight-update rank directly equivalent to \lora{} (Figure~\ref{fig:jac}).
-\begin{figure}[ht]\centering\includegraphics[width=.8\textwidth]{jacobian_effective_rank.pdf}
+\begin{figure}[tbp]\centering\includegraphics[width=.8\textwidth]{jacobian_effective_rank.pdf}
 \caption{Effective rank of the \lora{} update and \sym{} local Jacobian. These measure related local complexity but are not identical weight-space objects.}\label{fig:jac}\end{figure}
 
 \subsection{Second-order structure}
 For fixed linear output reduction $c$,
 \begin{equation}H=2\frac{\alpha}{r}U\operatorname{diag}(Pc)U^T.\label{eq:hess}\end{equation}
 \lora{} has zero adapter-only Hessian; \sym{} is nonzero. Mean \sym{} Frobenius norms are 155.15, 92.13, 52.68, 17.61 at ranks 1,2,4,8. The decrease combines learned factors and scale and is not evidence of weaker useful interactions. For fixed $c$, the Hessian is input independent, so repeated tokens are not independent observations. Autograd verifies Equation~\ref{eq:hess}; a full-block Hessian was not evaluated.
-\begin{figure}[ht]\centering\includegraphics[width=.8\textwidth]{adapter_interaction_hessian.pdf}
+\begin{figure}[tbp]\centering\includegraphics[width=.8\textwidth]{adapter_interaction_hessian.pdf}
 \caption{Adapter-only second-order response. \lora{} is exactly zero; \sym{} has an explicit nonzero response. This does not prove a causal performance mechanism.}\label{fig:hess}\end{figure}
 
 \FloatBarrier\section{Computational cost}
@@ -173,14 +201,79 @@ Both rank-4 adapters have 6,144 parameters. Table~\ref{tab:cost} shows nearly id
 Relative differences are approximately $+0.22\%$ forward latency, $-0.27\%$ backward latency, $+1.25$~MiB VRAM, and $-0.22\%$ throughput. The result applies only to this implementation and hardware configuration.
 
 \section{Discussion}
-The controlled WikiText-2 result is positive and configuration specific: \sym{} is lower at every rank and in every paired held-out comparison. AG News favours \lora{} on average, showing task dependence. Rank and optimization duration matter: rank 1 changes ordering during training, while higher-rank gaps narrow over the recorded interval. Constant scale alters magnitude but does not change the tested seed's qualitative pattern; the design does not fully isolate rank, scale, and parameter count.
+The controlled experiments reveal a more nuanced picture than a simple ranking between \lora{} and \sym{}. The central WikiText-2 confirmation provides consistent evidence in favour of the quadratic adapter under the tested language-modelling protocol, whereas the AG News classification experiment reverses that ordering. The main interpretation is therefore not that one adapter dominates the other, but that the functional form of a low-rank correction can materially affect behaviour and that this effect depends on task, rank, scaling policy, and optimization regime.
 
-The derivative study guarantees a structural distinction and measures learned spectra, but does not prove that second-order response causes lower language-model loss. The cost study shows that this structure can be implemented at almost the same measured practical cost. Figure~\ref{fig:related} summarizes the architectural context without implying equivalence.
-\begin{figure}[ht]\centering\includegraphics[width=\textwidth]{adapter-family-comparison.pdf}
+\subsection{WikiText-2 result and rank dependence}
+The strongest evidence comes from the independent 5,000-step WikiText-2 confirmation campaign. Across ranks 1, 2, 4, and 8, \sym{} achieves lower mean final validation loss and lower mean held-out test loss than the matched \lora{} baseline. All twelve paired seed--rank held-out comparisons also show lower loss for \sym{} under this protocol.
+
+The mean held-out test difference increases across the tested ranks, from approximately $-0.0125$ at rank 1 to $-0.0381$ at rank 8. This shows that the observed difference is not confined to a single rank. Nevertheless, the present experiments do not establish why the magnitude changes with rank. Under the primary protocol, increasing rank changes both adapter capacity and the effective scale $\alpha/r$, so rank alone cannot be treated as the sole causal variable.
+
+The appropriate interpretation is configuration specific: the \sym{} functional form is useful in the tested GPT-2 Small, WikiText-2, block-0 \texttt{attn.c\_proj} setting. The experiment does not establish that quadratic adaptation must outperform linear adaptation for language modelling in general.
+
+\subsection{Optimization dynamics}
+The convergence analysis shows that training duration can materially change the comparison. Rank 1 is particularly informative. \lora{} has lower mean validation loss at the earlier recorded checkpoints, but the ordering changes between the 2,000- and 3,000-step evaluations. \sym{} subsequently maintains the lower mean validation loss through the final 5,000-step checkpoint. A comparison terminated earlier could therefore have produced a different conclusion.
+
+Ranks 2, 4, and 8 follow a different trajectory. \sym{} already has lower mean validation loss at the recorded 1,000-step point. At ranks 4 and 8, however, the magnitude of the difference narrows later in training. These trajectories show that adapter comparisons should not be interpreted independently of optimization duration. They do not establish asymptotic behaviour, because the study observes only the finite schedules that were actually executed.
+
+\subsection{Scaling and rank}
+The main rank experiment fixes $\alpha$ at 4, so $\alpha/r$ decreases as rank increases. The constant-scale ablation tests whether this scaling rule alone accounts for the observed rank pattern. With $\alpha/r$ fixed to 1, the qualitative 1,000-step pattern remains unchanged for seed 42: \lora{} performs better at rank 1, while \sym{} performs better at ranks 2, 4, and 8.
+
+The magnitude does change. At rank 8, for example, the \sym{}-minus-\lora{} validation-loss difference changes from $-0.1177$ under the primary scaling policy to $-0.0975$ under constant effective scale. This indicates that scaling contributes to the magnitude of the observed difference but does not, for the tested seed, fully explain the rank-dependent sign pattern. Because the constant-scale experiment was performed for only one seed, it cannot establish a general rank-scaling relationship.
+
+\subsection{Task dependence and AG News}
+AG News provides an important counterexample to the WikiText-2 result. Under the matched classification protocol, \lora{} achieves higher mean test accuracy, higher macro-F1, and lower test loss. \sym{} also shows substantially greater seed-to-seed variability.
+
+The two settings differ in several respects. WikiText-2 is a causal language-modelling task, whereas AG News is classification and introduces a trainable classification head. The datasets, objectives, and training budgets also differ. The present experiments do not isolate which factor causes the reversed ordering. The defensible conclusion is therefore that the relative benefit of the quadratic correction is task and protocol dependent. This negative counter-result is scientifically important because it prevents the positive WikiText-2 result from being interpreted as evidence of universal superiority.
+
+\subsection{Structural interpretation}
+The derivative analyses establish that \lora{} and \sym{} belong to different local function classes. \lora{} is linear with respect to the adapter input. Its Jacobian is input independent and its adapter-only Hessian is exactly zero. Its correction can therefore be represented by a single fixed low-rank update. \sym{} has an input-dependent local Jacobian and an explicit non-zero adapter-only second derivative. Its effective local transformation changes with the incoming activation and cannot, in general, be reduced to one constant $\Delta W$.
+
+The effective rank of the \lora{} update, the effective rank of the \sym{} local Jacobian, the ranks of $U$ and $P$, and the output-covariance rank describe different mathematical objects. They should not be interpreted as interchangeable measurements of one underlying ``weight rank.'' These structural results demonstrate that the quadratic adapter has a different functional form, but they do not establish that Jacobian variability, Hessian magnitude, or any measured spectral property causes the observed WikiText-2 improvement. Establishing such a causal relationship would require additional intervention-based analysis.
+
+\subsection{Computational implications}
+The matched rank-4 benchmark shows that the explicit quadratic operation introduces little measured practical cost in the tested configuration. Forward latency differs from \lora{} by approximately $+0.22\%$, backward latency by approximately $-0.27\%$, peak allocated VRAM increases by about 1.25~MiB, and forward throughput remains nearly unchanged.
+
+This indicates that, in this implementation and hardware configuration, the element-wise square can be introduced without a substantial measured computational penalty. The benchmark should not be generalized to larger models, higher ranks, longer sequences, larger batches, or different accelerators without additional measurement.
+
+\subsection{Overall interpretation}
+Taken together, the experiments support the view that adapter functional form is an important design variable alongside rank and parameter count. Two adapters with matched trainable matrix shapes and parameter budgets can implement substantially different local transformations and can produce different empirical behaviour across tasks and optimization regimes.
+
+Within the controlled WikiText-2 study, \sym{} provides a consistent advantage over the matched \lora{} baseline. The AG News experiment demonstrates that this advantage does not automatically transfer to another task. The evidence therefore supports \sym{} as a viable task-dependent alternative to \lora{} while leaving open the broader question of when quadratic activation-space interactions are most useful. Figure~\ref{fig:related} summarizes the architectural context without implying equivalence.
+\begin{figure}[tbp]\centering\includegraphics[width=\textwidth]{adapter-family-comparison.pdf}
 \caption{Architectural comparison of \lora{}, \sym{}, PERA, QuadraNet V2, and a nonlinear bottleneck adapter. The location of a higher-order operation differs; visual similarity does not imply mathematical equivalence.}\label{fig:related}\end{figure}
 
 \section{Limitations}
-Evidence is limited to GPT-2 Small, two datasets, restricted placements, three central seeds, one scaling-ablation seed, and no exhaustive hyperparameter sweep. Related methods except \lora{} were not reproduced. There is no full-block Hessian, and cost was measured for one rank, device, batch size, and sequence length. The literature review does not establish universal novelty over every quadratic architecture.
+This study was designed to provide controlled evidence about one specific quadratic low-rank adapter formulation rather than a complete benchmark of parameter-efficient fine-tuning. Several limitations therefore constrain the generality of the conclusions.
+
+\subsection{Model scope}
+The controlled experiments use GPT-2 Small. The results do not establish that the same behaviour will occur in larger GPT-2 variants, other decoder-only language models, encoder architectures, vision Transformers, or multimodal systems. Model scale and architecture may alter optimization dynamics, representation geometry, memory behaviour, and the usefulness of explicit quadratic interactions. Replication across additional model families is required before drawing broader architectural conclusions.
+
+\subsection{Task and dataset scope}
+The main controlled evidence comes from two datasets with different objectives: WikiText-2 causal language modelling and AG News classification. The reversed ordering demonstrates that task dependence matters, but two datasets are insufficient to characterize the conditions under which quadratic activation-space adaptation is beneficial. Additional generative, classification, reasoning, and domain-specific tasks would be required to establish broader transfer behaviour.
+
+\subsection{Experimental scope}
+The central WikiText-2 comparison uses three seeds, four ranks, one primary controlled adapter placement, one optimizer family, and a fixed training schedule. Three seeds provide repeated evidence but remain a small basis for broad statistical inference. The study therefore reports means, sample standard deviations, and paired differences without claiming general statistical significance over a larger population of training runs.
+
+The principal controlled placement is zero-based block 0 \texttt{attn.c\_proj}. Earlier placement and multilayer studies provide exploratory context, but they do not constitute a fully controlled evaluation of every Transformer layer and projection.
+
+\subsection{Scaling and hyperparameters}
+The main rank study fixes $\alpha$ at 4, causing $\alpha/r$ to vary with rank. The constant-scale ablation examines this issue only for seed 42. The result therefore suggests that scaling alone does not explain the observed rank pattern for that seed, but it does not provide a complete multi-seed characterization of the interaction between rank and scale.
+
+The study also does not perform an exhaustive independent hyperparameter optimization for each adapter. Alternative learning rates, schedules, initialization policies, regularization settings, or scales could alter the relative behaviour.
+
+\subsection{Mechanistic interpretation}
+The Jacobian and Hessian analyses establish analytical and measured structural differences between \lora{} and \sym{}, but they do not demonstrate that these differences cause the WikiText-2 performance gap. The adapter-only Hessian is analytically tractable. A full Transformer-block Hessian was not evaluated because it would require a separate scalar-reduction protocol and substantially greater computational complexity. More detailed intervention studies would be needed to connect local second-order structure directly to task performance.
+
+\subsection{Computational-cost scope}
+The computational benchmark covers one rank-4 configuration with batch size 1, sequence length 128, and one recorded hardware/software environment. The near-equal latency and small memory difference should therefore be interpreted as an implementation-specific measurement, not as a universal statement about computational efficiency. Scaling behaviour for larger models, higher ranks, longer sequences, larger batches, and different accelerators remains unmeasured.
+
+\subsection{Related-work scope}
+\lora{} is the only related method reproduced as a direct controlled baseline. DoRA, MoRA, HiRA, LoRAN, PERA, QuadraNet V2, and nonlinear adapter methods establish mathematical and architectural context, not experimentally reproduced comparisons under the same protocol. Published results from those works are therefore not directly compared numerically with the present experiments.
+
+The literature review also does not establish universal mathematical novelty relative to every prior quadratic neural architecture. The contribution should instead be understood as the formulation, controlled evaluation, and structural characterization of this specific activation-space quadratic adapter.
+
+\subsection{Generalization}
+The results establish reproducible behaviour within the tested conditions. They do not establish state-of-the-art performance, universal superiority over \lora{}, broad transfer across model families, or a general causal advantage of second-order adaptation. Broader replication across larger models, additional tasks, additional placements, and independently repeated scaling conditions is required to determine how widely the observed behaviour generalizes.
 
 \section{Conclusion}
 \sym{} is a viable quadratic activation-space adapter. Under controlled 5,000-step WikiText-2 conditions, it achieves lower mean final validation and held-out test loss than matched \lora{} at ranks 1,2,4,8. AG News favours \lora{} on average, so the evidence is task dependent. Rank, scaling, and duration qualify the result. Jacobian and Hessian analyses establish functional differences, while the matched benchmark finds small overhead. Adapter functional form therefore matters alongside parameter count, but broader generalization requires additional models, tasks, placements, and replications.
@@ -190,7 +283,48 @@ Evidence is limited to GPT-2 Small, two datasets, restricted placements, three c
 Per-seed WikiText-2 values are available in \path{results/tables/rank-confirmation-5000/rank_5000_per_seed.csv}; AG News runs are in \path{results/tables/downstream-ag-news/downstream_controlled_results.csv}. Aggregate tables in this paper are reconstructed from those files without cherry-picking. Figure provenance is recorded in \path{results/manifests/FIGURE_MANIFEST.md}.
 
 \section{Historical evidence}\label{app:history}
-Historical best-recorded validation summaries include, at 500 steps: \lora{} 3.5732, element-wise quadratic 3.6351, signed quadratic 3.6257, interaction 3.5581, \sym{} 3.5526, and Linear+Quadratic 3.5302. At one rank-4 insertion point, 1,000-step summaries were 3.5491, 3.4770, 3.4928 for \lora{}, \sym{}, Linear+Quadratic; at 2,000 steps they were 3.4598, 3.3784, 3.4360. These exploratory results motivated controls but are not merged with confirmation trajectories.
+The historical experiments preceded the final controlled protocols and were used to explore adapter formulation, training duration, placement, and distribution of a fixed parameter budget across layers. Because these campaigns were not conducted under one uniform protocol, they are reported here as exploratory evidence and are not pooled with the controlled rank-confirmation or AG News results.
+
+\subsection{Adapter-family exploration}
+Table~\ref{tab:hist-family} reports the verified three-seed best-recorded validation summaries from the 500-step screen. These exploratory runs are not a matched final benchmark.
+\begin{table}[htbp]\centering\small
+\caption{Historical 500-step adapter-family screen: mean best-recorded validation loss over three seeds.}\label{tab:hist-family}
+\begin{tabular}{lr@{\qquad}lr}\toprule
+Adapter&Loss&Adapter&Loss\\\midrule
+\lora{}&3.5732&Element-wise quadratic&3.6351\\
+Signed quadratic&3.6257&Interaction&3.5581\\
+\sym{}&3.5526&Linear+Quadratic&3.5302\\\bottomrule
+\end{tabular}\end{table}
+
+\subsection{Longer exploratory training}
+Table~\ref{tab:hist-duration} reports best-recorded validation loss at the historical rank-4 block-0 insertion point. These are minima recorded within each run and are not final-checkpoint test results.
+\begin{table}[htbp]\centering\small
+\caption{Historical three-seed mean best-recorded validation loss at rank 4, block 0.}\label{tab:hist-duration}
+\begin{tabular}{rccc}\toprule
+Steps&\lora{}&\sym{}&Linear+Quadratic\\\midrule
+1,000&3.5491&3.4770&3.4928\\
+2,000&3.4598&3.3784&3.4360\\\bottomrule
+\end{tabular}\end{table}
+
+\subsection{Placement and depth exploration}
+A seed-42, 20-step attention scan evaluated all twelve GPT-2 blocks. \sym{} recorded lower validation loss at 11 of 12 blocks; block 1 was the exception. At block 2, the largest short-run separation was 3.8243 for \lora{} versus 3.8030 for \sym{}. Separate attention-versus-MLP screens found nearly tied single-module MLP results, while the combined block-0 MLP branch used 15,360 parameters and therefore was not directly budget matched to the 6,144-parameter attention branches. These short screens established that placement merited further control; they do not define a stable depth ranking.
+
+\subsection{Fixed-budget multilayer exploration}
+Table~\ref{tab:hist-budget} summarizes verified three-seed, 2,000-step best-recorded validation loss at matched total budgets. Distributing a fixed budget changes both placement and local rank, so these results are not merged with the later single-placement rank confirmation.
+\begin{table}[htbp]\centering\small
+\caption{Historical 2,000-step mean best-recorded validation loss for fixed-budget geometries.}\label{tab:hist-budget}
+\begin{tabular}{rllcc}\toprule
+Budget&Geometry&Local rank&\lora{}&\sym{}\\\midrule
+6,144&Concentrated [2]&4&3.5039&3.3745\\
+6,144&Two layers [0,11]&2&3.3661&3.3730\\
+6,144&Four layers [0,3,7,11]&1&3.3199&3.3794\\
+12,288&Concentrated [2]&8&3.5013&3.3391\\
+12,288&Two layers [0,11]&4&3.3157&3.2390\\
+12,288&Four layers [0,3,7,11]&2&3.2578&3.2356\\\bottomrule
+\end{tabular}\end{table}
+
+\subsection{Role of the historical experiments}
+These exploratory campaigns served to identify promising adapter structures and experimental questions. They motivated the later controlled studies but do not carry the same evidential weight because their protocols differ in placement, duration, rank allocation, or evaluation definition. The central conclusions of this manuscript are therefore based on the controlled WikiText-2 confirmation, AG News classification, scaling, convergence, mechanism, and computational-cost experiments.
 
 \section{Reproducibility notes}
 Canonical tables are under \path{results/tables/}; commands and recorded software/hardware details are in \path{research/reproducibility/REPRODUCIBILITY.md}. Analytical Jacobian, Hessian, spectral, aggregation, and public-data tests are part of the repository suite. Raw private checkpoints are not embedded in the public manuscript.
