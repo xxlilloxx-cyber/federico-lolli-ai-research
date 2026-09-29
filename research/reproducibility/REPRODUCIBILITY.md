@@ -96,6 +96,7 @@ cd research/paper
 tectonic SCIENTIFIC_MANUSCRIPT.tex
 cd ../..
 cp research/paper/SCIENTIFIC_MANUSCRIPT.{md,tex,pdf} docs/data/
+cp research/paper/Federico_Lolli_Symmetric_Quadratic_Adaptation_GPT2.pdf docs/data/
 ```
 
 The files under `docs/data/` are generated public mirrors; the project overview

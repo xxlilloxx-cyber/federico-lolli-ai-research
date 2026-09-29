@@ -26,7 +26,7 @@ Open `http://localhost:8000/federico-lolli-ai-research/`.
   the source and aggregation used for each public figure.
 - `data/TECHNICAL_REPORT.md` mirrors the canonical standalone report at
   `../research/paper/TECHNICAL_REPORT.md`.
-- `data/SCIENTIFIC_MANUSCRIPT.pdf` is the public paper, while
+- `data/Federico_Lolli_Symmetric_Quadratic_Adaptation_GPT2.pdf` is the primary public paper, while
   `data/SCIENTIFIC_MANUSCRIPT.md` and `.tex` mirror its canonical sources; the
   adjacent `.tex` file is its publication-oriented LaTeX version.
 - `../scripts/validation/validate_public_long_data.py` validates final

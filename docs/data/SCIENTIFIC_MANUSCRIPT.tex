@@ -1,343 +1,199 @@
 \documentclass[11pt]{article}
-\usepackage[margin=1in]{geometry}
-\usepackage{amsmath,amssymb,booktabs,graphicx,hyperref}
-\setlength{\emergencystretch}{2em}
-\hypersetup{pdftitle={Symmetric Factorized Quadratic Adaptation: A Controlled Study of Nonlinear Low-Rank Adapters for GPT-2},pdfauthor={Federico Lolli},pdfsubject={Controlled study of linear and quadratic low-rank adaptation},pdfkeywords={parameter-efficient fine-tuning, low-rank adaptation, LoRA, quadratic adaptation, Transformers, GPT-2, PEFT}}
-\title{Symmetric Factorized Quadratic Adaptation:\\A Controlled Study of Nonlinear Low-Rank Adapters for GPT-2}
-\author{Federico Lolli\\\texttt{xxlilloxx@gmail.com}}
-\date{}
+\usepackage[margin=0.9in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,graphicx,hyperref,microtype,array,enumitem,caption,placeins,xcolor}
+\setlength{\emergencystretch}{2em}\setlength{\parindent}{0pt}\setlength{\parskip}{0.5em}
+\captionsetup{font=small,labelfont=bf}
+\graphicspath{{figures/}{../../docs/assets/publication/}}
+\hypersetup{colorlinks=true,linkcolor=blue!45!black,citecolor=blue!45!black,urlcolor=blue!55!black,pdftitle={Symmetric Factorized Quadratic Adaptation: A Controlled Study of Nonlinear Low-Rank Adapters for GPT-2},pdfauthor={Federico Lolli},pdfsubject={Parameter-efficient fine-tuning and quadratic low-rank adaptation},pdfkeywords={LoRA, PEFT, quadratic adaptation, GPT-2, low-rank adaptation, Transformers, parameter-efficient fine-tuning}}
+\newcommand{\sym}{\textsc{Symmetric}}\newcommand{\lora}{\textsc{LoRA}}
 \begin{document}
-\maketitle
+\special{pdf:minorversion 7}
+\begin{titlepage}\centering\vspace*{2.2cm}
+{\small\sffamily\bfseries RESEARCH PROJECT 01\\[.3em]FEDERICO LOLLI AI RESEARCH\par}\vspace{1.7cm}
+{\huge\bfseries Symmetric Factorized Quadratic Adaptation\par}\vspace{.4cm}
+{\Large A Controlled Study of Nonlinear Low-Rank Adapters for GPT-2\par}\vspace{2cm}
+{\Large Federico Lolli\par}\vspace{.3cm}{\href{mailto:xxlilloxx@gmail.com}{xxlilloxx@gmail.com}\par}
+\vfill{\large Independent exploratory research manuscript\par}\vspace{.3cm}{September 2026\par}\vspace{1cm}
+\end{titlepage}
 \begin{abstract}
-We compare LoRA with an activation-dependent symmetric quadratic adapter at
-matched parameter counts in frozen GPT-2. An independent 24-run WikiText-2
-confirmation favors Symmetric in mean final validation and held-out loss at
-ranks 1, 2, 4, and 8, whereas six controlled AG News runs favor LoRA in mean
-accuracy and macro-F1. A single-seed scaling ablation, convergence curves,
-local-Jacobian spectra, adapter Hessians, and a matched cost benchmark show that
-the result is task and protocol dependent rather than universal.
+Parameter-efficient fine-tuning adapts pretrained models through small modules while leaving the backbone frozen. This study asks whether a low-rank adapter gains useful capacity by replacing the linear \lora{} correction with an explicit quadratic function of projected activations. The proposed \sym{} adapter projects an activation to a low-dimensional space, squares its coordinates element by element, and maps them back; it has the same trainable matrix shapes and parameter count as matched \lora{}. An independent 24-run WikiText-2 confirmation covers ranks 1, 2, 4, and 8, three seeds, and 5,000 optimizer steps. \sym{} obtains lower mean final validation and held-out test loss at every tested rank, with all twelve paired test comparisons favouring it. A six-run AG News classification study provides the counter-result: \lora{} achieves higher mean accuracy and macro-F1. A single-seed scaling ablation and fresh convergence trajectories qualify the rank result. Analytical and empirical studies show that \lora{} has an input-independent Jacobian and zero adapter-only Hessian, whereas \sym{} has an activation-dependent local Jacobian and explicit second-order response. A matched rank-4 benchmark finds nearly identical latency and a 1.25~MiB increase in peak allocated VRAM. The evidence supports quadratic activation-space adaptation as a viable, task-dependent design point rather than a universally superior replacement for linear low-rank adaptation.
 \end{abstract}
+\tableofcontents\newpage
 
 \section{Introduction}
-Parameter-efficient fine-tuning adapts a pretrained model while keeping its
-backbone frozen. We ask whether a quadratic function of a projection input can
-offer useful capacity at the same parameter count as a LoRA branch. This is an
-independently evaluated formulation and controlled experimental study, not a
-claim that quadratic low-rank networks are unprecedented.
+Full fine-tuning updates every model weight, whereas parameter-efficient fine-tuning (PEFT) freezes most pretrained parameters and learns a small correction. This reduces task-specific state and makes the correction's functional form a meaningful experimental variable. \lora{}~\cite{hu2022lora} is a natural baseline: it is simple, parameter efficient, and interpretable as one constant low-rank weight update. Its adapter branch is nevertheless linear in the incoming activation and cannot itself express second-order feature interactions.
 
-\section{Related Work and Positioning}
-The methods below are compared at the mathematical and architectural levels.
-Published benchmark results obtained with different backbones, datasets,
-training budgets, or evaluation protocols are not numerically ranked against
-the experiments in this study.
+This study evaluates a small change in function class. The incoming activation is projected to $r$ coordinates, those coordinates are squared element by element, and the result is projected back. This preserves the trainable shapes of \lora{} while making the correction quadratic and activation dependent. A controlled comparison is necessary because rank, parameter count, placement, scaling, training duration, seed, and task can all alter the observed ordering.
 
-LoRA~\cite{hu2022lora} learns the low-rank linear correction
-$\frac{\alpha}{r}(xA)B$ and is the direct experimental baseline. DoRA
-\cite{liu2024dora} decomposes weight magnitude and direction. MoRA
-\cite{jiang2024mora} uses a square trainable matrix with nonparametric
-transforms and is designed to increase effective update rank, while HiRA
-\cite{huang2025hira} uses a Hadamard-product high-rank weight update. LoRAN
-\cite{li2024loran} applies a nonlinear transformation to the low-rank weight
-update. These are contextual weight- or parameter-space methods and were not
-experimentally reproduced here.
+\subsection{Research question}
+Can a low-rank adapter gain useful expressive capacity by replacing the purely linear \lora{} correction with an explicit quadratic function of projected activations, while retaining a comparable parameter budget and practical computational cost? The question matters because adapters of identical size can implement different local transformations.
 
-\subsection{PERA}
-PERA~\cite{zhang2026pera} introduces polynomial expansion in parameter and
-low-rank-factor space before factor composition. This study instead applies
-the nonlinearity directly to projected activations:
-\[
-x\longrightarrow xU\longrightarrow (xU)\odot(xU)\longrightarrow P.
-\]
-Both approaches investigate higher-order structure in parameter-efficient
-adaptation, but the polynomial or quadratic operation acts on different
-mathematical objects. PERA was not used as an experimental baseline.
+\subsection{Contributions}
+This work provides (i) a precise symmetric factorized quadratic activation-space adapter; (ii) controlled comparisons with \lora{} under matched budgets; (iii) rank, scaling, convergence, placement, and downstream analyses; (iv) local-Jacobian, effective-rank, and adapter-Hessian analyses; (v) a matched cost benchmark; and (vi) conservative positioning relative to verified related methods. These are empirical and analytical contributions, not a claim of universal novelty or superiority. Sections~2--4 introduce the context, method, and protocols; Sections~5--8 present results, mechanism analysis, and cost; Sections~9--11 discuss scope and conclusions.
 
-\subsection{QuadraNet V2}
-For one output coordinate of the Symmetric adapter,
-\[
-\Delta y_j=xQ_jx^T,
-\qquad
-Q_j=\frac{\alpha}{r}U\,\operatorname{diag}(P_{:,j})\,U^T.
-\]
-This places the method within the family of factorized quadratic
-transformations represented by work such as QuadraNet V2
-\cite{xu2026quadranet}. Across a complete multi-output layer, all output
-coordinates share the projection directions contained in $U$, while $P$
-provides signed output-specific coefficients. Consequently, similarity at the
-single-output quadratic-form level does not establish complete architectural
-equivalence. QuadraNet V2 is treated as a closely related quadratic precedent,
-not evidence of either exact equivalence or universal novelty.
+\section{Related work and positioning}
+Table~\ref{tab:related} compares mechanisms rather than incompatible benchmark scores. Only \lora{} is reproduced as a direct baseline.
+\begin{table}[ht]\centering\small
+\caption{Mathematical and architectural positioning. External methods were not experimentally reproduced.}\label{tab:related}
+\begin{tabular}{p{.13\linewidth}p{.38\linewidth}p{.39\linewidth}}\toprule
+Method&Core mechanism&Relation to this study\\\midrule
+\lora{}&Low-rank linear correction&Direct baseline\\
+DoRA&Weight magnitude/direction decomposition&Different weight parameterization\\
+MoRA&Square trainable matrix with fixed transforms&Weight-space high-rank strategy\\
+HiRA&Hadamard-product high-rank update&Weight-space higher-rank adaptation\\
+LoRAN&Nonlinear low-rank weight update&Nonlinear weight-space method\\
+PERA&Polynomial expansion of low-rank factors&Higher-order parameter/factor-space method\\
+QuadraNet V2&Factorized quadratic neural transformation&Related quadratic-form precedent\\
+This study&Squared projected activation&Activation-dependent quadratic correction\\\bottomrule
+\end{tabular}\end{table}
+\lora{} learns a linear update~\cite{hu2022lora}. DoRA separates weight magnitude and direction~\cite{liu2024dora}; MoRA uses a square matrix and fixed transforms~\cite{jiang2024mora}; HiRA forms a Hadamard-product update~\cite{huang2025hira}; and LoRAN transforms a low-rank weight update nonlinearly~\cite{li2024loran}. These operate in weight or parameter space rather than by squaring the current activation.
 
-\subsection{Position of the proposed method}
-The defining feature of the Symmetric adapter is that its low-rank projection
-is applied to the incoming activation and the projected coordinates are
-squared before being mapped back to output space:
-\[
-\Delta y_{\mathrm{Symmetric}}
-=\frac{\alpha}{r}\left((xU)\odot(xU)\right)P.
-\]
-This produces an activation-dependent quadratic correction with an
-input-dependent Jacobian while retaining a parameter structure comparable in
-size to the matched LoRA branch. The experiments evaluate this design directly
-against LoRA under controlled budgets. DoRA, MoRA, HiRA, LoRAN, PERA, and
-QuadraNet V2 clarify the literature context and are not reproduced baselines.
+\subsection{PERA} PERA expands low-rank factors polynomially before composition~\cite{zhang2026pera}. This study follows $x\to xU\to(xU)\odot(xU)\to P$. Both investigate higher-order structure, but the operation acts on different objects. PERA is not an experimental baseline here.
+
+\subsection{QuadraNet V2} QuadraNet V2 is a verified precedent for factorized quadratic transformations~\cite{xu2026quadranet}. For one output, the present adapter is $xQ_jx^T$. Across a multi-output layer, all $Q_j$ share directions in $U$ and differ through coefficients in $P$; single-output similarity does not establish full architectural equivalence.
+
+\subsection{Position of the proposed method} The defining feature is the element-wise square after the activation projection and before the output projection. This yields an input-dependent local transformation at matched \lora{} size. Figure~\ref{fig:related} later summarizes where higher-order operations enter the compared methods.
 
 \section{Method}
-The adapter is trained beside a frozen GPT-2 projection rather than replacing
-the pretrained model. Only the low-rank branch is optimized, allowing the
-functional form to be compared under matched trainable matrix shapes and
-parameter counts. For a row vector $x\in\mathbb{R}^{1\times d}$, frozen
-$W\in\mathbb{R}^{d\times d_{out}}$, and frozen bias $b$, the base projection is
-$y_{base}=xW+b$. LoRA and Symmetric add
+\subsection{Frozen projection and parallel correction}
+For row activation $x\in\mathbb{R}^{1\times d}$, frozen $W\in\mathbb{R}^{d\times d_{out}}$, and frozen bias $b$,
+\begin{equation}y_{base}=xW+b.\label{eq:base}\end{equation}
+The adapter is a parallel trainable branch. Matched \lora{} and \sym{} corrections are
 \begin{align}
-\Delta y_L &= \frac{\alpha}{r}(xA)B,\\
-\Delta y_S &= \frac{\alpha}{r}((xU)\odot(xU))P.
+\Delta y_{\mathrm{LoRA}}&=\frac{\alpha}{r}(xA)B,\label{eq:lora}\\
+\Delta y_{\mathrm{Sym}}&=\frac{\alpha}{r}\bigl((xU)\odot(xU)\bigr)P,\label{eq:sym}
 \end{align}
-Here $A,U\in\mathbb{R}^{d\times r}$ and
-$B,P\in\mathbb{R}^{r\times d_{out}}$. Both methods contain
-$r(d+d_{out})$ trainable adapter parameters. For output $j$,
-\begin{equation}
-\Delta y_{S,j}=xQ_jx^T,\qquad
-Q_j=\frac{\alpha}{r}U\operatorname{diag}(P_{:,j})U^T,
-\end{equation}
-so $Q_j$ is symmetric and $\operatorname{rank}(Q_j)\le r$. The directions in
-$U$ are shared across outputs; signed coefficients in $P$ mean that $Q_j$ need
-not be positive semidefinite. The expansion
-$(ax_1+bx_2)^2=a^2x_1^2+2abx_1x_2+b^2x_2^2$ shows that the square creates
-pairwise cross terms. LoRA remains linear in its input, whereas Symmetric
-introduces explicit second-order interactions.
+where $A,U\in\mathbb{R}^{d\times r}$ and $B,P\in\mathbb{R}^{r\times d_{out}}$. Both contain $r(d+d_{out})$ parameters, or $2dr$ for square GPT-2 \texttt{c\_proj}. \lora{} applies two linear projections; \sym{} forms $z=xU$, computes $z\odot z$, then applies $P$.
+\begin{figure}[ht]\centering\includegraphics[width=\textwidth]{adapter_architecture_comparison_for_paper.png}
+\caption{Architecture of matched \lora{} and \sym{} adapters. Both add a low-rank trainable branch beside a frozen projection. \lora{} is linear; \sym{} inserts an element-wise square before the output projection.}\label{fig:architecture}\end{figure}
 
-The controlled rank study uses $\alpha=4$, so $\alpha/r$ equals 4, 2, 1, and
-0.5 at ranks 1, 2, 4, and 8. The separate constant-scale ablation was motivated
-by this coupling of rank and effective scale.
+\subsection{Quadratic structure}
+For output $j$,
+\begin{align}\Delta y_j&=\frac{\alpha}{r}\sum_kP_{kj}(xu_k)^2=xQ_jx^T,\label{eq:coord}\\Q_j&=\frac{\alpha}{r}U\operatorname{diag}(P_{:,j})U^T.\label{eq:qj}\end{align}
+$Q_j$ is symmetric and $\operatorname{rank}(Q_j)\le r$. Directions in $U$ are shared across outputs; signed coefficients in $P$ mean $Q_j$ need not be positive semidefinite. The identity $(ax_1+bx_2)^2=a^2x_1^2+2abx_1x_2+b^2x_2^2$ shows that squared projections create cross terms. Output factors are zero initialized. The main study uses $\alpha=4$, giving $\alpha/r=4,2,1,0.5$ at ranks 1,2,4,8 and motivating Section~\ref{sec:scaling}.
 
-\section{Experiments}
-The work separates exploratory campaigns from controlled experiments. Early
-studies compared adapter families, training durations, attention and MLP
-placements, a full 12-block attention scan, and multilayer fixed-budget designs.
-Their protocols were not uniform, so they are not merged with controlled data.
+\subsection{GPT-2 insertion point}
+The controlled adapter receives the concatenated attention output entering zero-based block 0 \texttt{attn.c\_proj}. Frozen projection and adapter outputs are summed before attention residual dropout and residual addition (Figure~\ref{fig:placement}).
+\begin{figure}[ht]\centering\includegraphics[width=.94\textwidth]{gpt2-attn-adapter-path.pdf}
+\caption{Controlled GPT-2 placement. The trainable adapter and frozen block-0 \texttt{attn.c\_proj} share an input; their outputs are summed before residual dropout and the attention residual addition. Block numbering is zero based.}\label{fig:placement}\end{figure}
 
-\begin{table}[ht]
-\centering\small
-\caption{Completed experimental campaigns and their scientific roles.}
-\begin{tabular}{p{0.22\linewidth}p{0.46\linewidth}p{0.22\linewidth}}\toprule
-Campaign & Design & Role\\\midrule
-Adapter families & LoRA, quadratic, interaction, Symmetric, and mixed variants & Exploration\\
-Depth/placement & Attention/MLP screens and 12-block scan & Placement evidence\\
-Fixed-budget multilayer & 6,144 and 12,288 parameters across layers & Depth/local rank\\
-AG News & Two methods, three seeds, 500 steps & Classification\\
-Rank screening & Two methods, four ranks, three seeds, 1,000 steps & Screening\\
-Rank confirmation & 24 fresh runs, 5,000 steps & Central LM evidence\\
-Scaling ablation & $\alpha=4$ versus $\alpha/r=1$, seed 42 & Scale check\\
-Mechanism/cost & Stored checkpoints and rank-4 benchmark & Structure and cost\\\bottomrule
-\end{tabular}
-\end{table}
+\FloatBarrier\section{Experimental design}
+Historical studies motivated controlled questions but are not pooled with them. Table~\ref{tab:campaigns} records each campaign's role.
+\begin{table}[ht]\centering\small
+\caption{Completed experimental campaigns.}\label{tab:campaigns}
+\begin{tabular}{p{.2\linewidth}p{.49\linewidth}p{.21\linewidth}}\toprule
+Campaign&Design&Role\\\midrule
+Adapter families&Linear, quadratic, interaction, symmetric, mixed variants&Exploration\\
+Depth/placement&Attention/MLP screens and 12-block scan&Placement\\
+Fixed-budget multilayer&6,144/12,288 parameters across layers&Depth/local rank\\
+AG News&Two methods, three seeds, 500 steps&Classification\\
+Rank screening&Two methods, four ranks, three seeds, 1,000 steps&Screening\\
+Rank confirmation&24 fresh runs, 5,000 steps&Central LM evidence\\
+Scaling ablation&$\alpha=4$ versus $\alpha/r=1$, seed 42&Scale check\\
+Mechanism/cost&Stored checkpoints; matched rank-4 benchmark&Structure/cost\\\bottomrule
+\end{tabular}\end{table}
 
-Controlled WikiText-2 experiments use frozen GPT-2 Small, consecutive
-128-token causal-language-model blocks, and one adapter beside zero-based block
-0 \texttt{attn.c\_proj}. Frozen projection and adapter outputs are summed before
-attention residual dropout and residual addition. Runs use batch size 1,
-gradient accumulation 4, AdamW at $3\times10^{-4}$, gradient clipping 1.0, no
-scheduler, ranks 1/2/4/8, $\alpha=4$, and seeds 42/123/456. The independent
-1,000-step screening and 5,000-step confirmation are not concatenated.
+\subsection{Historical exploration} Early adapter-family studies, 500/1,000/2,000-step durations, attention and MLP screens, a 12-block attention scan, and fixed-budget multilayer designs established trainability and motivated later controls. Their nonuniform protocols remain separate; Appendix~\ref{app:history} summarizes verified values.
 
-Best recorded validation, final validation at the declared step, and held-out
-test evaluation of the final checkpoint are distinct. Test data do not select
-the method, rank, hyperparameters, or checkpoint.
+\subsection{Controlled WikiText-2 protocol} GPT-2 Small is frozen. WikiText-2 is packed into consecutive 128-token blocks for causal cross-entropy. Runs use block 0 \texttt{attn.c\_proj}, batch 1, accumulation 4, AdamW at $3\times10^{-4}$, clipping 1.0, no scheduler, $\alpha=4$, ranks 1/2/4/8, seeds 42/123/456, and 5,000 steps. The 1,000-step screen is independent. Best recorded validation, exact final validation, and final-checkpoint held-out test are distinct; test data select nothing.
 
-AG News uses the same frozen backbone and placement with a trainable
-classification head, 4,096 training examples, a fixed 1,000-example stratified
-validation subset, the original test split, 500 optimizer steps, paired seeds,
-and 9,216 trainable parameters including the head. Matching backbone,
-placement, rank, budget, optimizer, duration, and seed set limits obvious
-confounds; separate scale, convergence, and downstream analyses address the
-remaining questions.
+\subsection{Controlled AG News protocol} The same frozen backbone and placement are used with a classification head, 4,096 training examples, a fixed 1,000-example stratified validation subset, the original test split, rank 4, three seeds, and 500 steps. Each method has 9,216 trainable parameters including the head.
 
-\section{Results}
-\begin{table}[h]
-\centering
-\caption{Mean final-checkpoint loss $\pm$ sample SD over three seeds.}
-\begin{tabular}{rcccc}\toprule
-Rank & LoRA val & Symmetric val & LoRA test & Symmetric test\\\midrule
-1 & 3.5734$\pm$.0051 & 3.5314$\pm$.0207 & 3.9256$\pm$.0009 & 3.9131$\pm$.0042\\
-2 & 3.4773$\pm$.0057 & 3.4340$\pm$.0249 & 3.8492$\pm$.0025 & 3.8305$\pm$.0144\\
-4 & 3.3483$\pm$.0093 & 3.3101$\pm$.0011 & 3.7656$\pm$.0054 & 3.7429$\pm$.0024\\
-8 & 3.3054$\pm$.0117 & 3.2446$\pm$.0096 & 3.7319$\pm$.0035 & 3.6938$\pm$.0044\\\bottomrule
-\end{tabular}
-\end{table}
+\subsection{Scaling ablation} A seed-42, 1,000-step ablation compares fixed $\alpha=4$ with constant $\alpha/r=1$ ($\alpha=r$). It is exploratory and separate from the main confirmation.
 
-Paired Symmetric-minus-LoRA held-out differences are
-$-0.0125\pm0.0051$, $-0.0187\pm0.0119$, $-0.0227\pm0.0035$, and
-$-0.0381\pm0.0072$ at ranks 1, 2, 4, and 8. All twelve paired seed
-comparisons favour Symmetric under this protocol.
+\subsection{Mechanism and cost protocols} Final checkpoints are reused for spectra, output covariance, local Jacobians, and adapter-only Hessians on fixed held-out activations. Analytical derivatives are checked against double-precision autograd. The cost benchmark uses rank 4, batch 1, sequence length 128, 10 warm-up and 30 measured iterations. No full-block Hessian was completed.
 
-\begin{table}[h]
-\centering
-\caption{AG News held-out results, mean $\pm$ sample SD over three seeds.}
-\begin{tabular}{lccc}\toprule
-Method & Accuracy & Macro-F1 & Test loss\\\midrule
-LoRA & $0.8201\pm0.0051$ & $0.8156\pm0.0050$ & $0.5445\pm0.0542$\\
-Symmetric & $0.8021\pm0.0240$ & $0.7929\pm0.0315$ & $0.6847\pm0.1919$\\\bottomrule
-\end{tabular}
-\end{table}
-AG News favours LoRA on average, so the language-model ordering is task
-dependent.
+\FloatBarrier\section{Controlled results}
+\subsection{WikiText-2 confirmation}
+Table~\ref{tab:rank} reports final-checkpoint means and sample SD. Lower is better.
+\begin{table}[ht]\centering
+\caption{Final WikiText-2 loss over three seeds.}\label{tab:rank}
+\begin{tabular}{rcccc}\toprule Rank&\lora{} val&\sym{} val&\lora{} test&\sym{} test\\\midrule
+1&$3.5734\pm0.0051$&$3.5314\pm0.0207$&$3.9256\pm0.0009$&$3.9131\pm0.0042$\\
+2&$3.4773\pm0.0057$&$3.4340\pm0.0249$&$3.8492\pm0.0025$&$3.8305\pm0.0144$\\
+4&$3.3483\pm0.0093$&$3.3101\pm0.0011$&$3.7656\pm0.0054$&$3.7429\pm0.0024$\\
+8&$3.3054\pm0.0117$&$3.2446\pm0.0096$&$3.7319\pm0.0035$&$3.6938\pm0.0044$\\\bottomrule\end{tabular}\end{table}
+Paired test differences (\sym{} minus \lora{}) are $-0.0125\pm0.0051$, $-0.0187\pm0.0119$, $-0.0227\pm0.0035$, and $-0.0381\pm0.0072$ at ranks 1,2,4,8; all 12 pairs favour \sym{}. Figure~\ref{fig:rank} shows individual seeds and SD. This result is specific to the tested task, placement, schedule, and scale.
+\begin{figure}[ht]\centering\includegraphics[width=.82\textwidth]{rank_5000_final_test_loss.pdf}
+\caption{Held-out WikiText-2 test loss after 5,000 steps at ranks 1,2,4,8. Lower is better. Points are seeds; markers/error bars are mean/sample SD. \sym{} is lower on average at every rank in this protocol.}\label{fig:rank}\end{figure}
 
-\section{Scaling, derivatives, learned spectra, and cost}
-\begin{table}[ht]
-\centering\small
-\caption{Seed-42 scaling ablation after 1,000 steps. $\Delta$ is Symmetric minus LoRA validation loss.}
-\begin{tabular}{rccc|ccc}\toprule
-& \multicolumn{3}{c}{$\alpha=4$} & \multicolumn{3}{c}{$\alpha/r=1$}\\
-Rank & LoRA & Sym. & $\Delta$ & LoRA & Sym. & $\Delta$\\\midrule
-1 & 3.6171 & 3.6614 & +0.0443 & 3.6301 & 3.6711 & +0.0410\\
-2 & 3.5861 & 3.5561 & -0.0300 & 3.5984 & 3.5693 & -0.0292\\
-4 & 3.5530 & 3.4780 & -0.0750 & 3.5530 & 3.4780 & -0.0750\\
-8 & 3.5492 & 3.4315 & -0.1177 & 3.5056 & 3.4081 & -0.0975\\\bottomrule
-\end{tabular}
-\end{table}
-The single-seed constant-$\alpha/r$ ablation preserves the screening sign
-pattern but changes its magnitude; it is not generalized beyond seed 42.
+\subsection{AG News}
+\begin{table}[ht]\centering\caption{AG News held-out results, mean $\pm$ sample SD.}\label{tab:ag}
+\begin{tabular}{lccc}\toprule Method&Accuracy&Macro-F1&Test loss\\\midrule
+\lora{}&$0.8201\pm0.0051$&$0.8156\pm0.0050$&$0.5445\pm0.0542$\\
+\sym{}&$0.8021\pm0.0240$&$0.7929\pm0.0315$&$0.6847\pm0.1919$\\\bottomrule\end{tabular}\end{table}
+\lora{} is better on average for all three measures. Figure~\ref{fig:ag} exposes the larger \sym{} seed variability, demonstrating that the WikiText-2 ordering does not transfer automatically.
+\begin{figure}[ht]\centering\includegraphics[width=.72\textwidth]{downstream_accuracy_comparison.pdf}
+\caption{AG News held-out accuracy. Bars/error bars are mean/sample SD; black points show all seeds. \lora{} is higher on average.}\label{fig:ag}\end{figure}
 
-\begin{table}[ht]
-\centering\small
-\caption{Mean paired validation difference (Symmetric minus LoRA) within fresh 5,000-step trajectories.}
-\begin{tabular}{rccccc}\toprule
-Rank & 1,000 & 2,000 & 3,000 & 4,000 & 5,000\\\midrule
-1 & +0.0280 & +0.0096 & -0.0043 & -0.0265 & -0.0419\\
-2 & -0.0367 & -0.0432 & -0.0319 & -0.0311 & -0.0434\\
-4 & -0.0707 & -0.0631 & -0.0803 & -0.0635 & -0.0382\\
-8 & -0.1247 & -0.1156 & -0.0947 & -0.0781 & -0.0608\\\bottomrule
-\end{tabular}
-\end{table}
-Rank 1 crosses between the recorded 2,000- and 3,000-step evaluations. The
-independent 1,000-step screen is not joined to these confirmation trajectories.
-The following derivative analyses characterize trained adapters; they do not
-by themselves explain the observed performance differences.
+\FloatBarrier\section{Scaling and convergence}\label{sec:scaling}
+\subsection{Constant-scale ablation}
+\begin{table}[ht]\centering\small\caption{Seed-42 validation loss after 1,000 steps; $\Delta=\sym{}-\lora{}$.}\label{tab:scale}
+\begin{tabular}{rccc@{\hspace{1em}}ccc}\toprule&\multicolumn{3}{c}{$\alpha=4$}&\multicolumn{3}{c}{$\alpha/r=1$}\\Rank&\lora{}&\sym{}&$\Delta$&\lora{}&\sym{}&$\Delta$\\\midrule
+1&3.6171&3.6614&+.0443&3.6301&3.6711&+.0410\\2&3.5861&3.5561&-.0300&3.5984&3.5693&-.0292\\4&3.5530&3.4780&-.0750&3.5530&3.4780&-.0750\\8&3.5492&3.4315&-.1177&3.5056&3.4081&-.0975\\\bottomrule\end{tabular}\end{table}
+The sign pattern persists for seed 42 while magnitude changes (Figure~\ref{fig:scale}); one seed prevents broader inference.
+\begin{figure}[ht]\centering\includegraphics[width=.8\textwidth]{rank_scaling_ablation_loss.pdf}
+\caption{Single-seed scaling ablation. Fixed $\alpha$ changes effective scale with rank; the comparison fixes $\alpha/r=1$.}\label{fig:scale}\end{figure}
 
+\subsection{Fresh confirmation trajectories}
+\begin{table}[ht]\centering\caption{Mean paired validation difference $\sym{}-\lora{}$.}\label{tab:conv}
+\begin{tabular}{rccccc}\toprule Rank&1,000&2,000&3,000&4,000&5,000\\\midrule
+1&+.0280&+.0096&-.0043&-.0265&-.0419\\2&-.0367&-.0432&-.0319&-.0311&-.0434\\4&-.0707&-.0631&-.0803&-.0635&-.0382\\8&-.1247&-.1156&-.0947&-.0781&-.0608\\\bottomrule\end{tabular}\end{table}
+Negative favours \sym{}. Rank 1 crosses between 2,000 and 3,000 recorded steps; ranks 2--8 favour \sym{} at every listed point. The independent screen is not joined to these curves. Figure~\ref{fig:conv} shows rank 1 and SD; no asymptotic claim is made.
+\begin{figure}[ht]\centering\includegraphics[width=.82\textwidth]{convergence_rank1.pdf}
+\caption{Fresh rank-1 validation trajectories in the 5,000-step confirmation. Curves are means; bands are sample SD.}\label{fig:conv}\end{figure}
+
+\FloatBarrier\section{Mechanism analysis}
+These analyses characterize structure but do not establish why performance differs.
 \subsection{Local Jacobians}
-LoRA and Symmetric have
-\begin{align}
-J_{\mathrm{LoRA}}&=\frac{\alpha}{r}AB,\\
-J_{\mathrm{Sym}}(x)&=2\frac{\alpha}{r}U\operatorname{diag}(xU)P.
-\end{align}
-LoRA is linear at the adapter level, so its Jacobian is input independent and
-can be represented by one fixed low-rank update matrix. Symmetric is quadratic;
-its local transformation changes with $\operatorname{diag}(xU)$ and cannot in
-general be reduced to one constant $\Delta W$. The analytical expressions were
-checked against PyTorch autograd in double precision.
+\begin{align}J_{\mathrm{LoRA}}&=\frac{\alpha}{r}AB,\label{eq:jl}\\J_{\mathrm{Sym}}(x)&=2\frac{\alpha}{r}U\operatorname{diag}(xU)P.\label{eq:js}\end{align}
+\lora{} is input independent and represents one fixed local update. \sym{} changes with $x$ and cannot generally be reduced to one constant $\Delta W$. Double-precision tests match these expressions to autograd.
 
-\subsection{Effective-rank analysis}
-\begin{table}[h]
-\centering
-\caption{Mean entropy effective ranks. The columns describe different
-mathematical objects.}
-\begin{tabular}{rccccc}\toprule
-Rank & LoRA update & Sym. Jacobian & Sym. $U$ & Sym. $P$ & Output cov.\\\midrule
-1 & 1.00 & 1.00 & 1.00 & 1.00 & 1.00\\
-2 & 1.92 & 1.67 & 2.00 & 1.98 & 1.92\\
-4 & 3.76 & 3.09 & 3.99 & 3.89 & 3.00\\
-8 & 6.57 & 5.59 & 7.96 & 7.28 & 3.59\\\bottomrule
-\end{tabular}
-\end{table}
-These quantities are not interchangeable notions of ``weight rank.'' In
-particular, the input-dependent Symmetric local-Jacobian rank is not a direct
-analogue of a fixed LoRA weight-update rank.
+\subsection{Effective rank}
+Entropy effective rank is $\exp(-\sum_i p_i\log p_i)$ for normalized singular values $p_i$. Table~\ref{tab:erank} reports distinct objects.
+\begin{table}[ht]\centering\caption{Mean entropy effective ranks.}\label{tab:erank}
+\begin{tabular}{rccccc}\toprule Rank&\lora{} update&\sym{} Jacobian&$U$&$P$&Output cov.\\\midrule
+1&1.00&1.00&1.00&1.00&1.00\\2&1.92&1.67&2.00&1.98&1.92\\4&3.76&3.09&3.99&3.89&3.00\\8&6.57&5.59&7.96&7.28&3.59\\\bottomrule\end{tabular}\end{table}
+The \sym{} local-Jacobian rank is not a fixed weight-update rank directly equivalent to \lora{} (Figure~\ref{fig:jac}).
+\begin{figure}[ht]\centering\includegraphics[width=.8\textwidth]{jacobian_effective_rank.pdf}
+\caption{Effective rank of the \lora{} update and \sym{} local Jacobian. These measure related local complexity but are not identical weight-space objects.}\label{fig:jac}\end{figure}
 
 \subsection{Second-order structure}
 For fixed linear output reduction $c$,
-\begin{equation}
-H=2\frac{\alpha}{r}U\operatorname{diag}(Pc)U^T.
-\end{equation}
-LoRA has an exactly zero adapter-only Hessian because its branch is linear.
-Symmetric mean Hessian Frobenius norms are 155.15, 92.13, 52.68, and 17.61 at
-ranks 1, 2, 4, and 8. The decrease combines learned-factor differences with
-$\alpha/r$ scaling and is not evidence of weaker or less useful interactions
-at higher rank. For fixed $c$, the Hessian is input independent, so repeated
-token activations are not independent Hessian observations. Double-precision
-autograd tests verify the formula. A full Transformer-block Hessian was not
-evaluated and is not reported as an empirical result.
+\begin{equation}H=2\frac{\alpha}{r}U\operatorname{diag}(Pc)U^T.\label{eq:hess}\end{equation}
+\lora{} has zero adapter-only Hessian; \sym{} is nonzero. Mean \sym{} Frobenius norms are 155.15, 92.13, 52.68, 17.61 at ranks 1,2,4,8. The decrease combines learned factors and scale and is not evidence of weaker useful interactions. For fixed $c$, the Hessian is input independent, so repeated tokens are not independent observations. Autograd verifies Equation~\ref{eq:hess}; a full-block Hessian was not evaluated.
+\begin{figure}[ht]\centering\includegraphics[width=.8\textwidth]{adapter_interaction_hessian.pdf}
+\caption{Adapter-only second-order response. \lora{} is exactly zero; \sym{} has an explicit nonzero response. This does not prove a causal performance mechanism.}\label{fig:hess}\end{figure}
 
-\subsection{Computational cost at rank 4}
-The matched benchmark uses batch size 1, sequence length 128, ten warm-up
-iterations, and 30 measured iterations. Both adapters have 6,144 trainable
-parameters.
-\begin{table}[h]
-\centering
-\caption{Matched rank-4 computational benchmark.}
-\begin{tabular}{lrrrr}\toprule
-Method & Forward (ms) & Backward (ms) & VRAM (MiB) & Tokens/s\\\midrule
-LoRA & $12.157\pm0.243$ & $14.805\pm0.236$ & 429.05 & 10,529\\
-Symmetric & $12.184\pm0.236$ & $14.766\pm0.188$ & 430.31 & 10,505\\\bottomrule
-\end{tabular}
-\end{table}
-Relative to LoRA, Symmetric changes forward latency by approximately $+0.22\%$,
-backward latency by $-0.27\%$, peak VRAM by $+1.25$ MiB, and throughput by
-approximately $-0.22\%$. The measured costs are nearly identical in this one
-implementation and hardware configuration; the benchmark is not generalized
-to other hardware or model scales.
+\FloatBarrier\section{Computational cost}
+Both rank-4 adapters have 6,144 parameters. Table~\ref{tab:cost} shows nearly identical measured cost.
+\begin{table}[ht]\centering\caption{Matched rank-4 benchmark: batch 1, length 128, 10 warm-up and 30 measured iterations.}\label{tab:cost}
+\begin{tabular}{lrrrr}\toprule Method&Forward (ms)&Backward (ms)&VRAM (MiB)&Tokens/s\\\midrule
+\lora{}&$12.157\pm0.243$&$14.805\pm0.236$&429.05&10,529\\\sym{}&$12.184\pm0.236$&$14.766\pm0.188$&430.31&10,505\\\bottomrule\end{tabular}\end{table}
+Relative differences are approximately $+0.22\%$ forward latency, $-0.27\%$ backward latency, $+1.25$~MiB VRAM, and $-0.22\%$ throughput. The result applies only to this implementation and hardware configuration.
+
+\section{Discussion}
+The controlled WikiText-2 result is positive and configuration specific: \sym{} is lower at every rank and in every paired held-out comparison. AG News favours \lora{} on average, showing task dependence. Rank and optimization duration matter: rank 1 changes ordering during training, while higher-rank gaps narrow over the recorded interval. Constant scale alters magnitude but does not change the tested seed's qualitative pattern; the design does not fully isolate rank, scale, and parameter count.
+
+The derivative study guarantees a structural distinction and measures learned spectra, but does not prove that second-order response causes lower language-model loss. The cost study shows that this structure can be implemented at almost the same measured practical cost. Figure~\ref{fig:related} summarizes the architectural context without implying equivalence.
+\begin{figure}[ht]\centering\includegraphics[width=\textwidth]{adapter-family-comparison.pdf}
+\caption{Architectural comparison of \lora{}, \sym{}, PERA, QuadraNet V2, and a nonlinear bottleneck adapter. The location of a higher-order operation differs; visual similarity does not imply mathematical equivalence.}\label{fig:related}\end{figure}
+
+\section{Limitations}
+Evidence is limited to GPT-2 Small, two datasets, restricted placements, three central seeds, one scaling-ablation seed, and no exhaustive hyperparameter sweep. Related methods except \lora{} were not reproduced. There is no full-block Hessian, and cost was measured for one rank, device, batch size, and sequence length. The literature review does not establish universal novelty over every quadratic architecture.
 
 \section{Conclusion}
-This study investigated whether a simple quadratic transformation in a
-low-dimensional activation space can provide a useful alternative to
-conventional linear low-rank adaptation. The results show that the Symmetric
-Quadratic Adapter is a practical and computationally lightweight mechanism for
-introducing explicit second-order interactions into a frozen Transformer while
-retaining the same low-rank parameter structure used for comparison with LoRA.
+\sym{} is a viable quadratic activation-space adapter. Under controlled 5,000-step WikiText-2 conditions, it achieves lower mean final validation and held-out test loss than matched \lora{} at ranks 1,2,4,8. AG News favours \lora{} on average, so the evidence is task dependent. Rank, scaling, and duration qualify the result. Jacobian and Hessian analyses establish functional differences, while the matched benchmark finds small overhead. Adapter functional form therefore matters alongside parameter count, but broader generalization requires additional models, tasks, placements, and replications.
 
-The strongest evidence comes from the controlled WikiText-2 experiments.
-Across 24 independent 5,000-step runs covering ranks 1, 2, 4, and 8 and three
-random seeds, Symmetric achieved lower mean final validation loss and lower
-mean held-out test loss than LoRA at every tested rank. The largest final-test
-difference was at rank 8, where mean loss decreased from
-$3.7319\pm0.0035$ for LoRA to $3.6938\pm0.0044$ for Symmetric. The rank-1
-trajectory also depends on optimization time: LoRA initially performs better,
-while Symmetric overtakes it between the recorded 2,000- and 3,000-step
-checkpoints. Rank and duration therefore matter in addition to final parameter
-budget.
+\appendix
+\section{Per-seed results and provenance}
+Per-seed WikiText-2 values are available in \path{results/tables/rank-confirmation-5000/rank_5000_per_seed.csv}; AG News runs are in \path{results/tables/downstream-ag-news/downstream_controlled_results.csv}. Aggregate tables in this paper are reconstructed from those files without cherry-picking. Figure provenance is recorded in \path{results/manifests/FIGURE_MANIFEST.md}.
 
-Holding $\alpha/r$ constant changes the magnitude of the differences but, for
-the tested seed, preserves the 1,000-step sign pattern: LoRA performs better at
-rank 1, whereas Symmetric performs better at ranks 2, 4, and 8. This pattern is
-not explained exclusively by the primary protocol's changing scale, but the
-single-seed ablation prevents a broader conclusion.
+\section{Historical evidence}\label{app:history}
+Historical best-recorded validation summaries include, at 500 steps: \lora{} 3.5732, element-wise quadratic 3.6351, signed quadratic 3.6257, interaction 3.5581, \sym{} 3.5526, and Linear+Quadratic 3.5302. At one rank-4 insertion point, 1,000-step summaries were 3.5491, 3.4770, 3.4928 for \lora{}, \sym{}, Linear+Quadratic; at 2,000 steps they were 3.4598, 3.3784, 3.4360. These exploratory results motivated controls but are not merged with confirmation trajectories.
 
-AG News provides a counterexample to general superiority. LoRA achieved higher
-mean test accuracy and macro-F1. Accuracy was $0.8201\pm0.0051$ for LoRA and
-$0.8021\pm0.0240$ for Symmetric, with greater variability for the quadratic
-adapter. The combined evidence indicates a task-dependent trade-off.
-
-The structural analyses establish that the adapters are genuinely different.
-LoRA is linear in its adapter input and has a fixed low-rank update. Symmetric
-has an input-dependent local Jacobian and explicit non-zero adapter-level
-second derivatives, so it cannot generally be reduced to one constant
-$\Delta W$. Local-Jacobian effective rank, learned-factor rank, and
-output-covariance rank are distinct quantities rather than interchangeable
-notions of weight rank. These properties do not establish a causal explanation
-for task performance.
-
-The added structure has little measured cost in the matched rank-4 benchmark:
-forward and backward latency are almost identical to LoRA, and peak memory
-increases by about 1.25 MiB. Thus, in this implementation, explicit quadratic
-activation interactions operate at approximately the same practical scale as
-the matched linear adapter.
-
-Taken together, \textbf{low-rank quadratic activation-space adaptation is a
-viable design point for parameter-efficient Transformer adaptation, and under
-the controlled WikiText-2 protocol it consistently improves final
-language-model loss relative to matched LoRA.} The AG News result demonstrates
-that this advantage does not automatically transfer across tasks. Functional
-form therefore merits treatment as an experimental variable alongside rank and
-parameter budget.
-
-The evidence remains limited to GPT-2 Small, restricted placements, two
-datasets, three seeds for the principal experiments, and one seed for the
-scaling ablation. It establishes neither state-of-the-art performance nor
-broad statistical significance, universal transfer, a causal link from
-second-order structure to loss, or universal mathematical novelty. Replication
-on larger models, additional tasks, broader placements, and independently
-repeated scaling configurations is required to determine how broadly the
-observed behavior generalizes.
+\section{Reproducibility notes}
+Canonical tables are under \path{results/tables/}; commands and recorded software/hardware details are in \path{research/reproducibility/REPRODUCIBILITY.md}. Analytical Jacobian, Hessian, spectral, aggregation, and public-data tests are part of the repository suite. Raw private checkpoints are not embedded in the public manuscript.
 
 \begin{thebibliography}{9}
 \bibitem{hu2022lora} E. J. Hu et al. \emph{LoRA: Low-Rank Adaptation of Large Language Models}. ICLR, 2022.

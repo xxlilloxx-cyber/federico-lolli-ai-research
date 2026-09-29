@@ -26,13 +26,33 @@ universal advantage over LoRA.
 
 ## 1. Introduction
 
-LoRA adapts a frozen weight by learning a low-rank linear correction. This is a
-strong baseline because it uses few parameters, introduces a controlled rank
-bottleneck, and is widely reproducible. A local linear adapter cannot itself
-represent second-order interactions among coordinates of its input activation.
-We ask whether an equally sized quadratic branch can provide useful adaptation
-capacity, and how its behavior changes with task, rank, placement, training
-duration, and scaling.
+Full fine-tuning updates every model weight, whereas parameter-efficient
+fine-tuning keeps most pretrained parameters frozen and learns a small
+correction. This reduces task-specific state and makes the correction's
+functional form an experimental variable. LoRA is a strong baseline because it
+uses few parameters, introduces a controlled rank bottleneck, and is widely
+reproducible. Its adapter branch is linear in its incoming activation and
+cannot itself represent second-order feature interactions.
+
+This study asks whether an equally sized quadratic branch provides useful
+capacity, and how its behavior changes with task, rank, placement, duration,
+and scaling. Controlled comparisons are necessary because each of these
+choices can alter the observed ordering.
+
+### Research question
+
+Can a low-rank adapter gain useful expressive capacity by replacing the purely
+linear LoRA correction with an explicit quadratic function of projected
+activations, while retaining a comparable parameter budget and practical
+computational cost?
+
+### Contributions
+
+The work provides a precisely defined activation-space quadratic adapter,
+matched comparisons with LoRA, rank/scaling/convergence/downstream evidence,
+local-Jacobian and Hessian analyses, a matched cost benchmark, and conservative
+positioning relative to verified related work. These are empirical and
+analytical contributions, not a claim of universal novelty or superiority.
 
 The contribution is an independently evaluated formulation and a controlled
 experimental record. It is not a claim that quadratic low-rank networks are
@@ -158,6 +178,12 @@ LoRA applies two linear projections, whereas Symmetric inserts an element-wise
 square of the projected activation before the output projection, producing an
 activation-dependent quadratic correction.
 
+![Figure 2. Adapter placement in the controlled GPT-2 block.](https://github.com/xxlilloxx-cyber/federico-lolli-ai-research/blob/main/docs/assets/figures/gpt2-attn-adapter-path.svg)
+
+**Figure 2.** The controlled adapter and frozen zero-based block 0
+`attn.c_proj` receive the same attention output. Their outputs are summed before
+attention residual dropout and the residual addition.
+
 ## 4. Experimental methodology
 
 The work proceeded through an exploratory stage and a controlled stage. The
@@ -227,6 +253,11 @@ Values are means ± sample SD over three seeds. Paired held-out differences are:
 All twelve paired comparisons favour Symmetric. The conclusion remains
 restricted to this backbone, placement, dataset, schedule, and scaling policy.
 
+![Figure 3. Held-out WikiText-2 test loss by rank.](https://github.com/xxlilloxx-cyber/federico-lolli-ai-research/blob/main/docs/assets/publication/rank_5000_final_test_loss.svg)
+
+**Figure 3.** Held-out test loss after 5,000 steps. Lower is better. Individual
+seed points, means, and sample SD show Symmetric below LoRA at each tested rank.
+
 ### 5.2 AG News
 
 | Method | Test accuracy | Test macro-F1 | Test loss |
@@ -237,6 +268,11 @@ restricted to this backbone, placement, dataset, schedule, and scaling policy.
 LoRA is higher on average for accuracy and macro-F1, lower on test loss, and
 favoured on two of three matched seeds. This negative result is central: the
 WikiText-2 ordering does not transfer to the tested classification protocol.
+
+![Figure 4. Controlled AG News accuracy.](https://github.com/xxlilloxx-cyber/federico-lolli-ai-research/blob/main/docs/assets/publication/downstream_accuracy_comparison.svg)
+
+**Figure 4.** AG News test accuracy with every seed and mean ± sample SD. LoRA
+is higher on average.
 
 ## 6. Scaling ablation and convergence
 
@@ -254,6 +290,11 @@ LoRA is lower at rank 1, while Symmetric is lower at ranks 2, 4, and 8. One
 seed is insufficient for a stable interaction estimate; scaling influences
 magnitude and remains a confound in the primary rank comparison.
 
+![Figure 5. Single-seed scaling ablation.](https://github.com/xxlilloxx-cyber/federico-lolli-ai-research/blob/main/docs/assets/publication/rank_scaling_ablation_loss.svg)
+
+**Figure 5.** Seed-42 comparison of fixed alpha and constant effective scale.
+The sign pattern is preserved while effect magnitude changes.
+
 | Rank | Step 1,000 | 2,000 | 3,000 | 4,000 | 5,000 |
 |---:|---:|---:|---:|---:|---:|
 | 1 | +0.0280 | +0.0096 | -0.0043 | -0.0265 | -0.0419 |
@@ -267,6 +308,12 @@ Ranks 2, 4, and 8 favour Symmetric at each listed point, while ranks 4 and 8
 show narrower gaps at step 5,000 than at step 1,000. The independent 1,000-step
 screen is not merged into these curves, and the trajectories do not establish
 asymptotic behavior.
+
+![Figure 6. Fresh rank-1 confirmation trajectories.](https://github.com/xxlilloxx-cyber/federico-lolli-ai-research/blob/main/docs/assets/publication/convergence_rank1.svg)
+
+**Figure 6.** Rank-1 validation trajectories from the independent 5,000-step
+confirmation. Bands are sample SD; the mean ordering crosses between the
+recorded 2,000- and 3,000-step evaluations.
 
 ## 7. Derivatives and learned spectra
 
@@ -315,6 +362,12 @@ interpreted as interchangeable notions of “weight rank”. In particular, the
 Symmetric local-Jacobian rank is not a direct analogue of a fixed LoRA
 weight-update rank.
 
+![Figure 7. Effective rank of the LoRA update and Symmetric local Jacobian.](https://github.com/xxlilloxx-cyber/federico-lolli-ai-research/blob/main/docs/assets/publication/jacobian_effective_rank.svg)
+
+**Figure 7.** Entropy effective rank across nominal adapter ranks. The plotted
+objects describe related local transformation complexity, not identical
+weight-space ranks.
+
 ### 7.3 Second-order structure
 
 For a fixed linear reduction of the adapter output by $c$,
@@ -331,6 +384,12 @@ quadratic-adapter Hessian is input independent, so repeated token activations
 are not independent Hessian observations. Double-precision autograd tests
 verified the analytical expression. A full Transformer-block Hessian was not
 evaluated and is not reported as an empirical result.
+
+![Figure 8. Adapter-only Hessian response.](https://github.com/xxlilloxx-cyber/federico-lolli-ai-research/blob/main/docs/assets/publication/adapter_interaction_hessian.svg)
+
+**Figure 8.** LoRA has zero adapter-only Hessian; Symmetric has an explicit
+nonzero quadratic response. This distinction does not prove a causal
+performance mechanism.
 
 ## 8. Computational cost at rank 4
 
@@ -351,17 +410,33 @@ adds only a small measured overhead in this implementation and hardware
 configuration; the result should not be generalized to all hardware or model
 scales.
 
-## 9. Discussion and limitations
+## 9. Discussion
 
 The results establish that the quadratic adapter trains stably at small budgets
 and can outperform matched LoRA on controlled WikiText-2 language modelling.
 They also show that this ordering is task dependent. The derivative analyses
 verify a structural difference but do not isolate its causal contribution.
-Limitations include GPT-2 Small, two datasets, three main seeds, one optimizer
-schedule, one focused controlled insertion point, short context, a single-seed
-scaling ablation, no second model family, and no completed full-block Hessian.
+Rank, effective scale, and optimization duration jointly qualify the observed
+ordering. The matched cost result shows that the added operation is practical
+in this implementation, without establishing cost at other scales.
 
-## 10. Conclusion
+![Figure 9. Architectural context for related methods.](https://github.com/xxlilloxx-cyber/federico-lolli-ai-research/blob/main/docs/assets/figures/adapter-family-comparison.svg)
+
+**Figure 9.** Original architectural comparison of LoRA, Symmetric, PERA,
+QuadraNet V2, and a nonlinear bottleneck adapter. Similar visual structure does
+not imply mathematical equivalence.
+
+## 10. Limitations
+
+The study is limited to GPT-2 Small, two datasets, restricted placements,
+three seeds for central experiments, one seed for the scaling ablation, and no
+exhaustive hyperparameter sweep. Related methods except LoRA were not
+experimentally reproduced. There is no full-block Hessian, and the cost
+benchmark covers one rank, device, batch size, and sequence length. The work
+does not establish universal mathematical novelty over all prior quadratic
+architectures.
+
+## 11. Conclusion
 
 This study investigated whether a simple quadratic transformation in a
 low-dimensional activation space can provide a useful alternative to
