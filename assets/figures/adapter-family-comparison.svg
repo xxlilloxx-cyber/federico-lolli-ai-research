@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="980" viewBox="0 0 1440 980" role="img" aria-labelledby="title desc">
+  <title id="title">Architectural comparison of five parameter-efficient adaptation families</title>
+  <desc id="desc">Original diagram comparing LoRA, the Symmetric Quadratic Adapter, PERA, QuadraNet V2, and a nonlinear bottleneck adapter. Frozen components are blue, trainable components orange, and fixed operations grey.</desc>
+  <defs>
+    <style>
+      .heading{font:700 28px sans-serif;fill:#17213a}.label{font:600 18px sans-serif;fill:#17213a}.small{font:14px sans-serif;fill:#25304a}.eq{font:17px monospace;fill:#17213a}.panel{fill:#fafbfe;stroke:#cad2e3;stroke-width:2}.frozen{fill:#d9e8ff;stroke:#3d6fa8;stroke-width:2}.train{fill:#ffe0b7;stroke:#b56712;stroke-width:2}.op{fill:#eceff4;stroke:#687386;stroke-width:2}.sum{fill:#fff;stroke:#17213a;stroke-width:2}.arrow{stroke:#313d55;stroke-width:2.5;fill:none;marker-end:url(#arrow)}
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#313d55"/></marker>
+  </defs>
+  <rect width="1440" height="980" fill="white"/>
+  <text x="720" y="44" text-anchor="middle" class="heading">Where the adaptation is applied</text>
+  <rect x="40" y="75" width="660" height="250" rx="18" class="panel"/>
+  <text x="70" y="112" class="label">LoRA — linear low-rank weight correction</text>
+  <rect x="75" y="165" width="115" height="55" rx="10" class="op"/><text x="132" y="199" text-anchor="middle" class="eq">x</text>
+  <rect x="245" y="130" width="150" height="55" rx="10" class="frozen"/><text x="320" y="164" text-anchor="middle" class="eq">xW + b</text>
+  <rect x="245" y="225" width="115" height="55" rx="10" class="train"/><text x="302" y="259" text-anchor="middle" class="eq">xA</text>
+  <rect x="415" y="225" width="145" height="55" rx="10" class="train"/><text x="487" y="259" text-anchor="middle" class="eq">(α/r) · B</text>
+  <circle cx="620" cy="180" r="27" class="sum"/><text x="620" y="187" text-anchor="middle" class="label">+</text>
+  <path d="M190 192 L225 192 L225 157 L245 157" class="arrow"/><path d="M190 192 L225 192 L225 252 L245 252" class="arrow"/><path d="M395 157 L593 174" class="arrow"/><path d="M360 252 L415 252" class="arrow"/><path d="M560 252 L600 204" class="arrow"/>
+  <text x="75" y="305" class="small">Δy = (α/r)(xA)B; constant ΔW can be merged.</text>
+
+  <rect x="740" y="75" width="660" height="250" rx="18" class="panel"/>
+  <text x="770" y="112" class="label">Symmetric Quadratic — activation-space correction</text>
+  <rect x="775" y="165" width="95" height="55" rx="10" class="op"/><text x="822" y="199" text-anchor="middle" class="eq">x</text>
+  <rect x="925" y="125" width="145" height="55" rx="10" class="frozen"/><text x="997" y="159" text-anchor="middle" class="eq">xW + b</text>
+  <rect x="905" y="225" width="100" height="55" rx="10" class="train"/><text x="955" y="259" text-anchor="middle" class="eq">z=xU</text>
+  <rect x="1045" y="225" width="125" height="55" rx="10" class="op"/><text x="1107" y="259" text-anchor="middle" class="eq">z ⊙ z</text>
+  <rect x="1210" y="225" width="100" height="55" rx="10" class="train"/><text x="1260" y="259" text-anchor="middle" class="eq">(α/r)P</text>
+  <circle cx="1350" cy="180" r="27" class="sum"/><text x="1350" y="187" text-anchor="middle" class="label">+</text>
+  <path d="M870 192 L895 192 L895 152 L925 152" class="arrow"/><path d="M870 192 L890 192 L890 252 L905 252" class="arrow"/><path d="M1070 152 L1323 174" class="arrow"/><path d="M1005 252 L1045 252" class="arrow"/><path d="M1170 252 L1210 252" class="arrow"/><path d="M1310 252 L1332 203" class="arrow"/>
+  <text x="775" y="305" class="small">Δy = (α/r)((xU) ⊙ (xU))P; input-dependent Jacobian.</text>
+
+  <rect x="40" y="365" width="660" height="250" rx="18" class="panel"/>
+  <text x="70" y="402" class="label">PERA — polynomial expansion in parameter-factor space</text>
+  <rect x="75" y="455" width="95" height="55" rx="10" class="op"/><text x="122" y="489" text-anchor="middle" class="eq">A, B</text>
+  <rect x="220" y="440" width="215" height="85" rx="10" class="train"/><text x="327" y="475" text-anchor="middle" class="small">factor polynomial</text><text x="327" y="501" text-anchor="middle" class="small">original + square + cross</text>
+  <rect x="485" y="455" width="150" height="55" rx="10" class="train"/><text x="560" y="489" text-anchor="middle" class="eq">construct ΔW</text>
+  <path d="M170 482 L220 482" class="arrow"/><path d="M435 482 L485 482" class="arrow"/>
+  <text x="75" y="560" class="small">The polynomial is built from trainable factors, not from the current x.</text>
+  <text x="75" y="588" class="small">Related motivation; not the adapter implemented in this repository.</text>
+
+  <rect x="740" y="365" width="660" height="250" rx="18" class="panel"/>
+  <text x="770" y="402" class="label">QuadraNet V2 — quadratic form added to a pretrained term</text>
+  <rect x="775" y="455" width="95" height="55" rx="10" class="op"/><text x="822" y="489" text-anchor="middle" class="eq">x</text>
+  <rect x="925" y="425" width="155" height="55" rx="10" class="frozen"/><text x="1002" y="459" text-anchor="middle" class="eq">Wc x + b</text>
+  <rect x="925" y="515" width="245" height="55" rx="10" class="train"/><text x="1047" y="549" text-anchor="middle" class="eq">xᵀ Waᵀ Wb x</text>
+  <circle cx="1270" cy="480" r="27" class="sum"/><text x="1270" y="487" text-anchor="middle" class="label">+</text>
+  <path d="M870 482 L900 482 L900 452 L925 452" class="arrow"/><path d="M870 482 L900 482 L900 542 L925 542" class="arrow"/><path d="M1080 452 L1243 474" class="arrow"/><path d="M1170 542 L1252 504" class="arrow"/>
+  <text x="775" y="586" class="small">Closely related quadratic-form precedent; sharing and placement differ.</text>
+
+  <rect x="390" y="655" width="660" height="250" rx="18" class="panel"/>
+  <text x="420" y="692" class="label">Nonlinear bottleneck adapter — general added module</text>
+  <rect x="425" y="760" width="95" height="55" rx="10" class="op"/><text x="472" y="794" text-anchor="middle" class="eq">x</text>
+  <rect x="570" y="760" width="130" height="55" rx="10" class="train"/><text x="635" y="794" text-anchor="middle" class="eq">down(x)</text>
+  <rect x="750" y="760" width="105" height="55" rx="10" class="op"/><text x="802" y="794" text-anchor="middle" class="eq">φ(·)</text>
+  <rect x="905" y="760" width="105" height="55" rx="10" class="train"/><text x="957" y="794" text-anchor="middle" class="eq">up(·)</text>
+  <path d="M520 787 L570 787" class="arrow"/><path d="M700 787 L750 787" class="arrow"/><path d="M855 787 L905 787" class="arrow"/>
+  <text x="425" y="850" class="small">A nonlinear bottleneck allows a general activation choice; it does not impose</text>
+  <text x="425" y="873" class="small">the shared symmetric form Qj = U diag(pj) Uᵀ.</text>
+  <rect x="420" y="925" width="24" height="18" class="frozen"/><text x="455" y="940" class="small">frozen</text><rect x="535" y="925" width="24" height="18" class="train"/><text x="570" y="940" class="small">trainable</text><rect x="680" y="925" width="24" height="18" class="op"/><text x="715" y="940" class="small">fixed operation</text>
+</svg>
