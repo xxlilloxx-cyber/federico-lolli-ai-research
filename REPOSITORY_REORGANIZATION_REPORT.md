@@ -101,6 +101,8 @@ Project 01. No placeholder project was published.
 - No manuscript PDF was compiled because the local toolchain contains no
   Pandoc, `pdflatex`, or Tectonic executable. Markdown and LaTeX sources are
   complete.
+- `CITATION.cff` is not present. No author or affiliation metadata was invented
+  to create one during this migration.
 - The full-block/model Hessian analysis is blocked and is not presented as a
   completed result.
 - The constant-scale ablation remains single-seed and is labelled accordingly.
@@ -114,7 +116,7 @@ Project 01. No placeholder project was published.
 
 - `9289aac` — inventory repository for conservative reorganization.
 - `069e4cb` — reorganize research artifacts and provenance.
-- The final publication-site/report commit is recorded after validation.
+- `e0abe6f` — complete multi-project research site and manuscript.
 
 No push, merge, deployment, Pages enablement, remote release, history rewrite,
 or stash modification occurred.
