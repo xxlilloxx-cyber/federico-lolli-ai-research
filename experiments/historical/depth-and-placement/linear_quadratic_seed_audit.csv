@@ -1,0 +1,4 @@
+seed,completed,steps,val_loss,ppl,params,rank_l,rank_q,directory,valid,timestamp
+123,True,2000,3.443798542022705,31.30564842171543,6144,1,2,results_extended/linear_quadratic/r123_steps2000,True,1790023447.397985
+42,True,2000,3.4191102981567383,30.5422294514775,6144,1,2,results_extended/linear_quadratic/r42_steps2000,True,1790023111.6673172
+456,True,2000,3.444941997528076,31.341465511474144,6144,1,2,results_extended/linear_quadratic/r456_steps2000,True,1790025495.6623127

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
+  <title id="title">Matched LoRA and Symmetric Quadratic adapter architectures</title>
+  <desc id="desc">Row-vector signal paths compare a frozen projection xW plus b with a parallel trainable branch. LoRA applies xA then B. Symmetric applies xU, the element-wise square z times z, then P. Both adapter outputs are scaled by alpha over rank and added to the frozen output.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0 0L10 4L0 8Z" fill="#28445f"/></marker>
+    <style>
+      .title{font:700 29px system-ui,sans-serif;fill:#15233c}.sub{font:500 17px system-ui,sans-serif;fill:#526176}
+      .label{font:600 18px system-ui,sans-serif;fill:#15233c}.small{font:500 14px system-ui,sans-serif;fill:#526176}
+      .math{font:600 20px ui-monospace,monospace;fill:#15233c}.frozen{fill:#e9eef5;stroke:#60758d;stroke-width:2}
+      .trainL{fill:#e8f3ff;stroke:#1266b2;stroke-width:2}.trainQ{fill:#fff0e6;stroke:#c45716;stroke-width:2}
+      .sum{fill:#fff;stroke:#28445f;stroke-width:2}.wire{fill:none;stroke:#28445f;stroke-width:2.4;marker-end:url(#arrow)}
+      .panel{fill:#fff;stroke:#d7e1ec;stroke-width:2}.dashL{fill:none;stroke:#1266b2;stroke-width:2;stroke-dasharray:8 7}
+      .dashQ{fill:none;stroke:#c45716;stroke-width:2;stroke-dasharray:8 7}
+    </style>
+  </defs>
+  <rect width="1200" height="650" fill="#fbfcff"/>
+  <rect class="panel" x="25" y="24" width="555" height="520" rx="16"/><rect class="panel" x="620" y="24" width="555" height="520" rx="16"/>
+  <text class="title" x="302" y="66" text-anchor="middle">LoRA</text><text class="sub" x="302" y="94" text-anchor="middle">linear low-rank correction</text>
+  <text class="math" x="302" y="130" text-anchor="middle">Δy = (α/r)(xA)B</text>
+  <text class="label" x="53" y="235">x ∈ R¹ˣᵈ</text>
+  <path class="wire" d="M125 230H195"/><rect class="frozen" x="200" y="190" width="160" height="80" rx="9"/>
+  <text class="label" x="280" y="224" text-anchor="middle">frozen W, b</text><text class="math" x="280" y="251" text-anchor="middle">xW + b</text>
+  <path class="wire" d="M360 230H493"/>
+  <path class="wire" d="M125 230V390H180"/><rect class="trainL" x="185" y="350" width="105" height="80" rx="9"/>
+  <text class="label" x="237" y="384" text-anchor="middle">A</text><text class="small" x="237" y="408" text-anchor="middle">d × r</text>
+  <path class="wire" d="M290 390H330"/><text class="small" x="310" y="374" text-anchor="middle">xA</text>
+  <rect class="trainL" x="335" y="350" width="105" height="80" rx="9"/><text class="label" x="387" y="384" text-anchor="middle">B</text><text class="small" x="387" y="408" text-anchor="middle">r × d_out</text>
+  <path class="wire" d="M440 390H520V265"/><circle class="sum" cx="520" cy="230" r="27"/><text class="title" x="520" y="239" text-anchor="middle">+</text>
+  <path class="wire" d="M547 230H565"/><text class="label" x="565" y="215" text-anchor="end">y</text><text class="small" x="487" y="332" text-anchor="middle">scale α/r</text>
+  <rect class="dashL" x="165" y="320" width="365" height="145" rx="12"/><text class="small" x="347" y="455" text-anchor="middle">trainable adapter · r(d + d_out) parameters</text>
+
+  <text class="title" x="897" y="66" text-anchor="middle">Symmetric Quadratic</text><text class="sub" x="897" y="94" text-anchor="middle">activation-dependent quadratic correction</text>
+  <text class="math" x="897" y="130" text-anchor="middle">Δy = (α/r)((xU) ⊙ (xU))P</text>
+  <text class="label" x="648" y="235">x ∈ R¹ˣᵈ</text>
+  <path class="wire" d="M720 230H790"/><rect class="frozen" x="795" y="190" width="160" height="80" rx="9"/>
+  <text class="label" x="875" y="224" text-anchor="middle">frozen W, b</text><text class="math" x="875" y="251" text-anchor="middle">xW + b</text>
+  <path class="wire" d="M955 230H1088"/>
+  <path class="wire" d="M720 230V390H750"/><rect class="trainQ" x="755" y="350" width="90" height="80" rx="9"/>
+  <text class="label" x="800" y="384" text-anchor="middle">U</text><text class="small" x="800" y="408" text-anchor="middle">d × r</text>
+  <path class="wire" d="M845 390H875"/><text class="small" x="860" y="374" text-anchor="middle">z = xU</text>
+  <rect class="trainQ" x="880" y="340" width="115" height="100" rx="50"/><text class="label" x="937" y="379" text-anchor="middle">z ⊙ z</text><text class="small" x="937" y="405" text-anchor="middle">element-wise</text><text class="small" x="937" y="424" text-anchor="middle">square</text>
+  <path class="wire" d="M995 390H1020"/><rect class="trainQ" x="1025" y="350" width="80" height="80" rx="9"/>
+  <text class="label" x="1065" y="384" text-anchor="middle">P</text><text class="small" x="1065" y="408" text-anchor="middle">r × d_out</text>
+  <path class="wire" d="M1105 390H1115V265"/><circle class="sum" cx="1115" cy="230" r="27"/><text class="title" x="1115" y="239" text-anchor="middle">+</text>
+  <path class="wire" d="M1142 230H1160"/><text class="label" x="1160" y="215" text-anchor="end">y</text><text class="small" x="1118" y="332" text-anchor="middle">scale α/r</text>
+  <rect class="dashQ" x="738" y="315" width="390" height="150" rx="12"/><text class="small" x="933" y="455" text-anchor="middle">trainable adapter · r(d + d_out) parameters</text>
+
+  <rect class="frozen" x="265" y="575" width="32" height="22" rx="3"/><text class="small" x="307" y="592">frozen pretrained path</text>
+  <rect class="trainL" x="482" y="575" width="32" height="22" rx="3"/><text class="small" x="524" y="592">trainable LoRA path</text>
+  <rect class="trainQ" x="708" y="575" width="32" height="22" rx="3"/><text class="small" x="750" y="592">trainable Symmetric path</text>
+  <text class="small" x="600" y="628" text-anchor="middle">For GPT-2 c_proj, d = d_out, so each adapter has 2dr trainable parameters.</text>
+</svg>

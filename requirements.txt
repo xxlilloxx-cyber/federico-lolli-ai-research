@@ -1,0 +1,13 @@
+torch==2.3.1
+transformers>=4.44,<5
+datasets>=2.20
+accelerate>=0.33
+peft>=0.12
+safetensors
+sentencepiece
+numpy
+pandas
+matplotlib
+tqdm
+pytest
+pyyaml

@@ -1,0 +1,13 @@
+kind: symmetric_quadratic
+model: gpt2
+seed: 42
+steps: 20
+batch_size: 1
+gradient_accumulation: 4
+sequence_length: 128
+learning_rate: 0.0003
+rank: 4
+alpha: 4.0
+layers: [0]
+projections: [attn.c_proj]
+output_dir: results_extended/symmetric_quadratic/r4_seed42

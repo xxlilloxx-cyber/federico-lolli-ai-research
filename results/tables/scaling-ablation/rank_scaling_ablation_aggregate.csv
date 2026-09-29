@@ -1,0 +1,17 @@
+policy,method,rank,alpha,alpha_over_rank,seed,final_validation_loss,final_validation_ppl
+current_alpha_4,LoRA,1,4.0,4.0,42,3.6170783042907715,37.22863801771407
+current_alpha_4,Symmetric Quadratic,1,4.0,4.0,42,3.6614015102386475,38.915845625416836
+current_alpha_4,LoRA,2,4.0,2.0,42,3.586073398590088,36.09207811969667
+current_alpha_4,Symmetric Quadratic,2,4.0,2.0,42,3.5560832023620605,35.02573939042241
+current_alpha_4,LoRA,4,4.0,1.0,42,3.552980899810791,34.91724732437122
+current_alpha_4,Symmetric Quadratic,4,4.0,1.0,42,3.478013753890991,32.395313066438675
+current_alpha_4,LoRA,8,4.0,0.5,42,3.549185037612915,34.7849575010108
+current_alpha_4,Symmetric Quadratic,8,4.0,0.5,42,3.431509494781494,30.923286075849774
+constant_effective_scale,LoRA,1,1.0,1.0,42,3.630100965499878,37.71662450279261
+constant_effective_scale,Symmetric Quadratic,1,1.0,1.0,42,3.671114444732666,39.29567432427469
+constant_effective_scale,LoRA,2,2.0,1.0,42,3.5984411239624023,36.54122677847148
+constant_effective_scale,Symmetric Quadratic,2,2.0,1.0,42,3.5692591667175293,35.49029102129151
+constant_effective_scale,LoRA,4,4.0,1.0,42,3.552980899810791,34.91724732437122
+constant_effective_scale,Symmetric Quadratic,4,4.0,1.0,42,3.478013753890991,32.395313066438675
+constant_effective_scale,LoRA,8,8.0,1.0,42,3.5055830478668213,33.300854185273344
+constant_effective_scale,Symmetric Quadratic,8,8.0,1.0,42,3.4081273078918457,30.208619811950452

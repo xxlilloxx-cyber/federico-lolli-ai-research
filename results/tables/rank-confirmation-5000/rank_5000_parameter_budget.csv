@@ -1,0 +1,9 @@
+method,rank,trainable_adapter_parameters,alpha,alpha_over_rank,placement
+lora,1,1536,4,4.0,transformer.h[0].attn.c_proj
+symmetric_quadratic,1,1536,4,4.0,transformer.h[0].attn.c_proj
+lora,2,3072,4,2.0,transformer.h[0].attn.c_proj
+symmetric_quadratic,2,3072,4,2.0,transformer.h[0].attn.c_proj
+lora,4,6144,4,1.0,transformer.h[0].attn.c_proj
+symmetric_quadratic,4,6144,4,1.0,transformer.h[0].attn.c_proj
+lora,8,12288,4,0.5,transformer.h[0].attn.c_proj
+symmetric_quadratic,8,12288,4,0.5,transformer.h[0].attn.c_proj
