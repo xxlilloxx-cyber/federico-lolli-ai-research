@@ -150,3 +150,32 @@ Figure `docs/assets/publication/adapter_architecture_comparison.svg` is generate
 ### Literature context
 
 LoRA is a low-rank weight update; DoRA, MoRA, HiRA, DeLoRA, RanLoRA, and TLoRA are literature context rather than direct baselines unless identical backbone, data, protocol, and budget are evaluated. Published results from those works, including PERA's ACL 2026 findings, are not numerically comparable with this GPT-2/WikiText-2 loss study. The PERA citation is Zhang et al., *Polynomial Expansion Rank Adaptation: Enhancing Low-Rank Fine-Tuning with High-Order Interactions*, Findings of ACL 2026, DOI 10.18653/v1/2026.findings-acl.650.
+## Controlled rank and mechanism evidence (September 2026 update)
+
+A separate factorial confirmation trained fresh single-insertion-point adapters
+for 5,000 optimizer steps at ranks 1, 2, 4, and 8, with seeds 42, 123, and 456.
+It must not be confused with the historical multi-layer campaign or the earlier
+1,000-step screen. Symmetric Quadratic obtained lower mean final validation and
+held-out WikiText-2 test loss at all four tested ranks. Mean paired final-test
+differences (Symmetric minus LoRA) were -0.0125, -0.0187, -0.0227, and -0.0381
+for ranks 1, 2, 4, and 8. This evidence is specific to frozen GPT-2 block-0
+`attn.c_proj`, WikiText-2, and the recorded optimizer/scaling protocol.
+
+The separate controlled AG News experiment gives an essential counterexample
+to a universal claim: LoRA averaged 0.8201 ± 0.0051 test accuracy and 0.8156 ±
+0.0050 macro-F1, versus 0.8021 ± 0.0240 and 0.7929 ± 0.0315 for Symmetric.
+Thus the evidence supports task dependence, not universal superiority.
+
+A seed-42 constant-effective-scale ablation retained the screening sign pattern:
+LoRA was lower at rank 1, while Symmetric was lower at ranks 2, 4, and 8. At
+rank 8 the paired difference changed from -0.1177 under alpha=4 to -0.0975
+under alpha/r=1. Scaling affects magnitude but did not remove the observed
+single-seed trend.
+
+Checkpoint analyses preserve the mathematical distinction between methods.
+LoRA has a constant effective update and zero adapter-only Hessian. Symmetric
+has no constant `DeltaW`; its local Jacobian is `2(alpha/r) U diag(xU) P` and
+its fixed-linear-reduction Hessian is `2(alpha/r) U diag(Pc) U^T`. Analytical
+derivatives matched autograd. The measured spectra and Hessian summaries are
+reported in `MECHANISM_ANALYSIS_REPORT.md`; they describe structure and do not
+establish a causal mechanism for task performance.

@@ -13,6 +13,9 @@ results_extended/
 results_local_rank/
 results_long_convergence_5000/
 results_multilayer/
+results_downstream_controlled/
+results_rank_factorial_controlled/
+results_rank_scaling_ablation/
 *.pt
 *.pth
 *.ckpt

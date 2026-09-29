@@ -73,3 +73,18 @@ rewrite was performed in this review pass.
 15. Reproduction instructions and public data schema — complete.
 16. Working-tree/deployment privacy review passed; all-references history scan found the local-stash raw-artifact blocker described above.
 17. Review ZIP generation is deferred until the history blocker is resolved or explicitly accepted for a branch-only release procedure.
+## September 2026 controlled-evidence update
+
+Tracked/publication-candidate text and data were rescanned after the controlled
+rank, scaling, mechanism, and cost analyses. The scan covered tracked working
+tree files and `docs/` for local home paths, unapproved email addresses,
+private-key markers, common token markers, checkpoints, binaries, and raw result
+directories. No matching sensitive value was found in the candidate payload.
+Raw controlled results and checkpoints are preserved locally and excluded by
+`.gitignore`; sanitized CSVs under `docs/data/` provide figure provenance.
+
+This working-tree scan is not a substitute for history review. `git stash list`
+still exposes the previously documented local stash reference
+`release-site-revision-before-sanitized-history`. It remains a release blocker
+for any operation that would expose all reachable refs. No stash ref or Git
+history was modified in this work.
