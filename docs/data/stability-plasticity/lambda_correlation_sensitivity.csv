@@ -1,0 +1,10 @@
+method,outcome,pearson_r_raw_lambda,pearson_r_log1p_lambda,spearman_rho,n
+lora,mean_forgetting,-0.6320885705953389,-0.974915259857775,-1.0,7
+lora,mean_new_fact_acquisition_nll,0.7717299156816047,0.9796921274822679,1.0,7
+lora,parameter_displacement_a_c_l2,-0.9478085723826843,-0.8994050961922139,-1.0,7
+symmetric,mean_forgetting,-0.7502340694601433,-0.9964313434816424,-1.0,7
+symmetric,mean_new_fact_acquisition_nll,0.9267440526580538,0.9341181269660893,1.0,7
+symmetric,parameter_displacement_a_c_l2,-0.9914541965441805,-0.7290462786587972,-0.9642857142857145,7
+combined,mean_forgetting,-0.7357739523649567,-0.9966640629530765,-1.0,7
+combined,mean_new_fact_acquisition_nll,0.8992128785070017,0.9382976899689973,1.0,7
+combined,parameter_displacement_a_c_l2,-0.976939474550798,-0.7847364334969306,-0.8928571428571429,7

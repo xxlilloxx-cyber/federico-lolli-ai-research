@@ -37,7 +37,7 @@ def shell(title: str, current: str, body: str, description: str = "") -> str:
         for label, href, key in items
     )
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="{description}"><title>{title}</title><link rel="stylesheet" href="../../assets/site.css"></head><body>
-<header class="site-header"><nav class="nav" aria-label="Site navigation"><a class="brand" href="../../index.html">Federico Lolli<small>AI Research</small></a><div class="nav-links"><a href="../../research/index.html">Projects</a><a href="../../about.html">About</a></div></nav></header><nav class="project-nav" aria-label="Project 01 navigation"><div class="inner">{nav}</div></nav>
+<header class="site-header"><nav class="nav" aria-label="Site navigation"><a class="brand" href="../../index.html">Federico Lolli<small>AI Research</small></a><div class="nav-links"><a href="../../index.html">Home</a><a href="../../research/index.html">Research</a><a href="../../publications.html">Publications</a><a href="{REPO}">GitHub</a><a href="../../about.html">About</a></div></nav></header><nav class="project-nav" aria-label="Project 01 navigation"><div class="inner">{nav}</div></nav>
 <main>{body}</main><footer class="site-footer"><p>Project 01 · Federico Lolli · <a href="mailto:xxlilloxx@gmail.com">xxlilloxx@gmail.com</a></p><p>Original code: <a href="{REPO}/blob/main/LICENSE">MIT</a>. Original text and figures: <a href="{REPO}/blob/main/LICENSE-CONTENT.md">CC BY 4.0</a>. Third-party materials retain their own terms.</p></footer></body></html>'''
 
 
@@ -116,6 +116,9 @@ def main() -> None:
         (PROJECT / old).write_text(f'<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url={target}"><link rel="canonical" href="{target}"><title>Moved</title><p>This page moved to <a href="{target}">{target}</a>.</p>\n', encoding="utf-8")
     catalog = '''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Research Projects — Federico Lolli</title><link rel="stylesheet" href="../assets/site.css"></head><body><header class="site-header"><nav class="nav"><a class="brand" href="../index.html">Federico Lolli<small>AI Research</small></a><div class="nav-links"><a href="../index.html">Home</a><a aria-current="page" href="index.html">Research projects</a><a href="../about.html">About &amp; contact</a></div></nav></header><main><section class="hero compact"><p class="eyebrow">Research projects</p><h1>Studies in this archive</h1><p class="lede">Projects are added only when their source material, completed evidence, and limitations can be presented clearly.</p></section><section><div class="grid two"><article class="card"><p class="project-number">RESEARCH PROJECT 01</p><h2>Symmetric Quadratic Adaptation</h2><p>Controlled experiments compare frozen-backbone LoRA with an activation-dependent quadratic adapter on WikiText-2 and AG News, followed by rank, scaling, mechanism, and cost analyses.</p><p><a href="../projects/01-quadratic-gpt2/index.html">Project overview →</a></p></article></div></section></main><footer class="site-footer">© Federico Lolli · <a href="mailto:xxlilloxx@gmail.com">xxlilloxx@gmail.com</a></footer></body></html>'''
     (DOCS / "research" / "index.html").write_text(catalog + "\n", encoding="utf-8")
+    # Generate the additive Project 02 indexes after the historical pages.
+    from build_stability_plasticity_site import build_stability_plasticity_site
+    build_stability_plasticity_site()
     print(f"built {len(project_pages())} Project 01 pages and 3 compatibility aliases")
 
 

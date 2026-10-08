@@ -1,8 +1,9 @@
 # Federico Lolli AI Research — GitHub Pages source
 
 This directory is the English GitHub Pages source for Federico Lolli's AI
-research archive. The site introduces Research Project 01, *Symmetric
-Quadratic Adaptation*, and links its methods, results, references, and
+research archive. The site preserves Research Project 01, *Symmetric
+Quadratic Adaptation*, and adds Research Project 02, *Stability–Plasticity
+Control*, as a separate scientific line with its own paper, evidence, and
 reproducibility material.
 
 ## Local preview
@@ -18,6 +19,12 @@ python3 -m http.server 8000 --directory site-preview/base
 Open `http://localhost:8000/federico-lolli-ai-research/`.
 
 ## Research materials
+
+- `projects/02-stability-plasticity/index.html` is the complete scientific page
+  for the continual factual-learning/EWC study.
+- `data/Federico_Lolli_Stability_Plasticity_Control.pdf` is its definitive
+  downloadable manuscript; `data/stability-plasticity/` contains public source,
+  aggregate tables, validation, and provenance files.
 
 - `data/long_final_per_seed.csv`, `data/long_final_aggregate.csv`, and
   `data/long_validation_trajectories.csv` are generated Pages mirrors of the

@@ -1,0 +1,7 @@
+category,canonical_runs
+Sequential single-adapter baseline,9
+Grow-unfrozen mechanistic control,9
+Hard-consolidation mechanistic control,9
+EWC lambda=100 mechanistic control,9
+Exploratory EWC sweep excluding lambda=100,18
+Additional EWC confirmation executions,18
