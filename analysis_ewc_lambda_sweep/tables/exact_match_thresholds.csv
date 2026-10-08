@@ -1,0 +1,4 @@
+method,lambda0_exact_match,first_lambda_with_decline,first_lambda_with_zero_exact_match,lambda30_exact_match,lambda50_exact_match
+combined,0.06944444444444445,1.0,50.0,0.013888888888888888,0.0
+lora,0.08333333333333333,10.0,30.0,0.0,0.0
+symmetric,0.3333333333333333,1.0,30.0,0.0,0.0

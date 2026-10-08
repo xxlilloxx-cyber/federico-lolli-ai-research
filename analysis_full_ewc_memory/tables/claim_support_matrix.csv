@@ -1,0 +1,7 @@
+claim,classification,evidence
+A. EWC strength provides a controllable stability-plasticity trade-off,SUPPORTED BY CONFIRMATION,Paired multi-seed forgetting and acquisition changes.
+B. The useful lambda region depends on adapter geometry,SUPPORTED BY CONFIRMATION,Method-specific confirmation grids and Pareto positions.
+C. Intermediate regularization can improve balanced memory relative to lambda=0,SUPPORTED BY CONFIRMATION,Three-seed final mean NLL and paired directions.
+D. Very strong EWC reduces forgetting but causes under-learning,SUPPORTED EXPLORATORILY ONLY,Seed-42 lambda 50/100/300 sweep; not in confirmation grid.
+E. Adapter geometries respond differently to identical EWC strength,SUPPORTED BY CONFIRMATION,Cross-method mean and seed-wise responses at shared lambdas.
+F. Parameter-displacement reduction tracks forgetting reduction,SUPPORTED EXPLORATORILY ONLY,"Within-method exploratory correlations; mechanistic consistency, not causality."

@@ -1,5 +1,13 @@
 # Repository structure
 
+The archive contains two independent but related research lines:
+
+- **Project 01 — Symmetric Quadratic Adaptation for GPT-2:** controlled LoRA,
+  Symmetric, and Combined adapter studies on WikiText-2 and AG News.
+- **Project 02 — Stability–Plasticity Control:** continual factual learning with
+  online empirical diagonal-Fisher EWC across LoRA, Symmetric, and Combined
+  adapters.
+
 ## Implementation
 
 - `src/adapters.py`: all implemented adapter families, insertion utilities,
@@ -68,9 +76,25 @@ build plugin.
 
 - `docs/`: English static site designed to work below
   `/federico-lolli-ai-research/`.
+- `docs/projects/01-quadratic-gpt2/`: stable Project 01 pages and aliases.
+- `docs/projects/02-stability-plasticity/`: Project 02 scientific overview.
+- `papers/stability-plasticity-control/`: stable index to the definitive
+  manuscript, analysis, code, figures, and tables.
+- `analysis_ewc_lambda_sweep/`: publication-safe single-seed EWC sweep analysis.
+- `analysis_full_ewc_memory/`: canonical multi-source continual-memory analysis,
+  final manuscript, tables, figures, reports, and provenance.
+- `experiments/factual_learning_lora_symmetric/`: Project 02 adapters, dataset,
+  training, EWC, aggregation, and evaluation implementation.
 - `tests/`: adapter, derivative, checkpoint, and public-data tests.
 - `tools/`: repository maintenance tools, including deterministic inventory.
 - `tmp/`: recoverable tracked archive with `MANIFEST.csv`; never deployed.
 
 Private ignored ZIPs, previews, environments, raw metrics, logs, and
 checkpoints stay in place and are not automatically tracked.
+
+## Project entry points
+
+| Project | Paper | Code | Results and reproducibility | Website |
+|---|---|---|---|---|
+| Project 01 | `research/paper/SCIENTIFIC_MANUSCRIPT.*` | `src/`, `scripts/` | `results/`, `research/reproducibility/` | `docs/projects/01-quadratic-gpt2/` |
+| Project 02 | `analysis_full_ewc_memory/paper/FINAL_PAPER_SUBMISSION.*` | `experiments/factual_learning_lora_symmetric/`, `run_abc_memory_study.py`, `run_ewc_lambda_sweep.py`, `run_ewc_confirmation.py` | `analysis_ewc_lambda_sweep/`, `analysis_full_ewc_memory/` | `docs/projects/02-stability-plasticity/` |

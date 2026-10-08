@@ -1,0 +1,187 @@
+# Repository Reorganization Plan
+
+## 2026-10-08 additive publication extension
+
+The Stability–Plasticity Control study is added as Project 02 without moving
+the established Project 01 tree or raw experimental directories. Its logical
+archive consists of the final manuscript and analysis under
+`analysis_full_ewc_memory/`, experiment code under
+`experiments/factual_learning_lora_symmetric/`, a stable paper index under
+`papers/stability-plasticity-control/`, and a static Pages presentation under
+`docs/projects/02-stability-plasticity/`.
+
+Publication selection is explicit. Source, configurations, tests, validated
+aggregate tables, provenance, reports, paper sources, PDF, and figures are
+archived. Checkpoints, raw result roots, logs, caches, render intermediates,
+virtual environments, and local review bundles remain local and ignored. This
+extension does not repeat the historical migration described below.
+
+**Project:** Symmetric Quadratic Adapter research  
+**Branch:** `public-release-preparation`  
+**Inventory baseline:** commit `6ca392a9a2d779e9dc587616d9e7905ec256c61f`  
+**Migration date:** 2026-09-29  
+**Scope:** local, conservative reorganization; no training, remote operation,
+deployment, history rewrite, or stash modification.
+
+## 1. Safety inventory
+
+The tracked working tree was clean before this plan was created. One historical
+stash exists and is retained unchanged. Local ignored material includes the
+Python environment, caches, review archives, site previews, all raw
+`results*` trees, metrics, logs, and adapter checkpoints. The repository uses
+`docs/` as a static GitHub Pages payload; no workflow, `_config.yml`, or CNAME
+is tracked in this checkout, and no remote-tracking default branch is present
+locally. The publication branch/root therefore cannot be independently proven
+from local Git metadata; the existing documentation consistently treats
+`docs/` as the intended project Pages source.
+
+The machine-readable inventory is
+`tmp/migration/repository_inventory.csv`. It contains 2,195 regular files,
+including 295 files tracked at the baseline, with byte size, SHA-256, category,
+tracking state, visibility, importance, and proposed destination. The inventory
+excludes `.git`, `.venv`, caches, and compiled Python artifacts.
+
+### Current evidence boundary
+
+- **Private and ignored:** original result trees, metrics, logs, model adapter
+  checkpoints, local previews, virtual environment, and review ZIP files.
+- **Publication-safe and tracked:** validated aggregate/per-seed CSVs,
+  publication figures, reports, source, scripts, configurations, tests, and
+  static site files.
+- **Rule:** private evidence remains in place. It will be referenced through
+  experiment manifests and never copied into the deployable `docs/` tree.
+
+## 2. Inventory classification
+
+| Class | Count | Proposed treatment |
+|---|---:|---|
+| Raw experiment data | 800 | preserve ignored private originals in place |
+| Checkpoints | 656 | preserve ignored private originals in place |
+| Figures | 272 | canonical tracked figures under `results/figures/`; deployable mirrors under `docs/assets/` |
+| Development notes | 174 | retain scientific/reproducibility notes; archive session notes |
+| Configurations | 84 | tracked canonical YAML under `config/`; private per-run configs remain with runs |
+| Aggregate results | 64 | canonical tracked tables under `results/tables/` |
+| Duplicate/review artifacts | 47 | ignored local files remain untouched; tracked duplicates are archived or generated mirrors |
+| Reports | 31 | canonical paper under `research/paper/`; campaign reports under `experiments/` |
+| Training/analysis/evaluation/plot scripts | 49 | group by function under `scripts/` and update references |
+| Website files | 10 | retain under `docs/` and validate project-base links |
+| Tests | 4 | retain under `tests/` and update canonical paths |
+| Source modules | 3 | introduce package directories while retaining compatibility entry points |
+
+## 3. Dependency findings
+
+Most training and report scripts assume repository-root execution. Several use
+`Path(__file__).resolve().parents[1]`, which changes when moved one directory
+deeper. Shell launchers reference `scripts/<name>` and `configs/<name>`.
+Documentation and Pages reproduction commands contain the same paths. These
+references must change in the same migration commit as each move.
+
+The private raw trees are path dependencies of runners and analysis scripts.
+Moving them would risk breaking exact reproduction and would move the only
+local private evidence copy. They therefore remain in their original ignored
+locations. Tracked experiment README/manifests will provide the new organized
+research view without duplicating checkpoints.
+
+`report/TECHNICAL_REPORT.md` is currently canonical and
+`docs/data/TECHNICAL_REPORT.md` is a generated public mirror. The migration
+makes `research/paper/TECHNICAL_REPORT.md` canonical and keeps the Pages copy
+explicitly generated by the synchronization script.
+
+## 4. Proposed tracked tree
+
+```text
+src/
+  adapters/                 adapter implementation
+  training/                 language-model trainer
+  adapters.py               compatibility import entry point
+  train.py                  compatibility CLI entry point
+scripts/
+  training/ evaluation/ aggregation/ analysis/ figures/ validation/
+config/
+  historical/ downstream/ rank/ scaling/
+experiments/
+  historical/ downstream-ag-news/ rank-screening-1000/
+  rank-confirmation-5000/ scaling-ablation/ mechanism-analysis/
+  computational-cost/
+comparisons/
+  papers/ models/ mathematical/ architectures/ methodology/
+  benchmarks/ novelty/ figures/
+research/
+  paper/ methodology/ mathematical-analysis/ reproducibility/ limitations/
+results/
+  tables/ figures/ manifests/
+docs/                       static generated/public site payload
+tests/                      unit and evidence-validation tests
+tools/                      repository maintenance utilities
+tmp/                        recoverable tracked archive and migration ledger
+```
+
+Directories will only be created when they contain a file.
+
+## 5. Migration mapping
+
+| Current | Destination | Notes |
+|---|---|---|
+| `configs/*.yaml` | `config/historical/*.yaml` | same bytes; update launchers and reports |
+| `scripts/run_*`, training shell files | `scripts/training/` | adjust project-root resolution and cross-script calls |
+| `scripts/evaluate_*` | `scripts/evaluation/` | same behavior |
+| `scripts/aggregate_*`, `export_*`, report generators | `scripts/aggregation/` | canonical data/export path |
+| `scripts/analyze_*`, benchmark/synthetic analysis | `scripts/analysis/` | no algorithm refactor |
+| figure generators | `scripts/figures/` | canonical tracked plot generators |
+| environment, smoke, validation scripts | `scripts/validation/` | no-training checks |
+| root scientific reports | campaign folders or `research/` | root retains only entry/legal/project files |
+| `report/TECHNICAL_REPORT.md` | `research/paper/TECHNICAL_REPORT.md` | sole editable canonical report |
+| `report/<campaign>/` | corresponding `experiments/<campaign>/` | tables/reports retained; figures move to canonical results tree where practical |
+| `analysis_*` | corresponding `experiments/<campaign>/` | eliminate dated top-level folders |
+| `docs/data/*.csv` | `results/tables/<campaign>/` | canonical tables; Pages copies remain generated mirrors |
+| `docs/assets/publication/*` | `results/figures/<campaign>/` | canonical figures; Pages copies remain generated mirrors |
+| operational/session notes | `tmp/development-notes/` | tracked, recoverable, hash-recorded |
+| legacy public tables | `tmp/duplicate-files/archive-public-data-legacy/` | retain provenance and warning |
+
+## 6. Experiment organization
+
+Each campaign gets a README and a manifest linking to:
+
+1. unchanged ignored raw directory;
+2. canonical public aggregate tables;
+3. canonical publication figures;
+4. relevant runner/configuration;
+5. scientific report and reproduction commands.
+
+The campaigns are historical, AG News downstream, 1,000-step controlled rank
+screening, independent 5,000-step confirmation, scaling ablation, mechanism
+analysis, and computational cost. Historical studies remain separate from all
+controlled campaigns.
+
+## 7. Archive policy
+
+`tmp/` is a tracked recoverable archive only for tracked, non-private material.
+`tmp/MANIFEST.csv` records original path, archive path, reason, original
+SHA-256, tracking status, and date. Ignored ZIPs, previews, raw runs, and
+checkpoints remain ignored in place because moving them gives no scientific
+benefit and can break local reproduction. No file is deleted.
+
+## 8. Main risks and controls
+
+| Risk | Control |
+|---|---|
+| Runner path breakage | update move and references together; no-training CLI/smoke validation |
+| Data/result mutation | compare hashes and numerical aggregate validations before/after |
+| Pages broken links | test all local links/assets beneath `/federico-lolli-ai-research/` |
+| Canonical/public mirror divergence | generator copies canonical sources; hash check |
+| Private evidence exposure | keep ignored raw/checkpoint paths ignored; tracked/deploy scans |
+| Literature overclaim | use original links, separate external published evidence from this study |
+| Recoverability loss | `git mv`, archive manifest, incremental local commits |
+| Historical stash exposure | report as unresolved release blocker; do not modify stash refs |
+
+## 9. Validation gates
+
+1. Inventory committed before migration.
+2. After source/scripts/config move: imports, `--help`/smoke checks, full tests.
+3. After experiment/data/report move: public CSV validators and numerical
+   hashes/checks.
+4. After figures/site update: figure manifest and full project-base link check.
+5. Final: tracked/private scans, full tests, diff review, migration report, and
+   clean tracked status.
+
+No migration phase will launch training.

@@ -1,0 +1,38 @@
+{
+  "result_root": "results_combined_extension",
+  "model": "gpt2",
+  "alpha": 4.0,
+  "seeds": [42, 123, 456],
+  "controlled": {
+    "steps": 5000,
+    "sequence_length": 128,
+    "batch_size": 1,
+    "gradient_accumulation": 4,
+    "optimizer": "AdamW",
+    "learning_rate": 0.0003,
+    "weight_decay": 0.0,
+    "gradient_clipping": 1.0,
+    "scheduler": "none",
+    "evaluation_every_steps": 25,
+    "checkpoint_steps": [1000, 2000, 3000, 4000, 5000]
+  },
+  "campaigns": {
+    "rank_confirmation": true,
+    "convergence": true,
+    "scaling_ablation": true,
+    "placement_scan": true,
+    "attention_mlp": true,
+    "multilayer": true,
+    "ag_news": true,
+    "mechanism": true,
+    "benchmark": true
+  },
+  "scaling": {"steps": 1000, "seeds": [42], "evaluation_every_steps": 25},
+  "placement": {"steps": 20, "seeds": [42], "long_confirmation": false, "long_steps": 5000, "selected_blocks": []},
+  "attention_mlp": {"steps": 20, "seeds": [42]},
+  "multilayer": {"steps": 1000, "seeds": [42]},
+  "ag_news": {"steps": 500, "train_samples": 4096, "validation_samples": 1000, "test_samples": 7600, "max_length": 128, "evaluation_every_steps": 100, "optional_12288": false},
+  "mechanism": {"heldout_blocks": 1, "token_positions": 16, "test_blocks": 64},
+  "benchmark": {"warmup_iterations": 10, "measured_iterations": 30, "batch_size": 1, "sequence_length": 128},
+  "failure_policy": "stop"
+}

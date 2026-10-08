@@ -1,0 +1,8 @@
+Setting,Value
+Backbone,"GPT-2 Small, frozen"
+Placement,block 0 attn.c_proj
+Phases,A→B→C; 12 facts each; no replay
+Steps,"2,500 per phase"
+Seeds,"42, 123, 456"
+Batch,microbatch 4; accumulation 1
+EWC,online diagonal Fisher; gamma=1

@@ -27,6 +27,19 @@ For output `j`, this is the symmetric quadratic form
 the projection directions in `U` across outputs and learns signed
 output-specific coefficients in `P`.
 
+## Research Project 02 — Stability–Plasticity Control
+
+The second research line studies continual factual learning under a fixed
+parameter-efficient budget. It compares LoRA, Symmetric, and Combined adapters
+in a no-replay `A → B → C` sequence and measures how online empirical
+diagonal-Fisher EWC controls retention and acquisition. The candidate EWC
+coefficients selected on seed 42 are evaluated on two additional seeds.
+
+- [Scientific web page](https://xxlilloxx-cyber.github.io/federico-lolli-ai-research/projects/02-stability-plasticity/)
+- [Full paper PDF](https://xxlilloxx-cyber.github.io/federico-lolli-ai-research/data/Federico_Lolli_Stability_Plasticity_Control.pdf)
+- [Experiment implementation](experiments/factual_learning_lora_symmetric/)
+- [Final analysis](analysis_full_ewc_memory/)
+
 ## Experimental program
 
 The repository preserves distinct campaigns rather than combining incompatible
@@ -66,6 +79,7 @@ superiority, state of the art, or broad transfer.
   provenance manifests.
 - [`research/`](research/) — paper, mathematical analysis, reproducibility, and
   limitations.
+- [`papers/`](papers/) — stable indexes for publication-oriented research artifacts.
 - [`comparisons/`](comparisons/) — verified related work, mathematical
   equivalence, methodology, and originality assessment.
 - [`docs/`](docs/) — generated/static GitHub Pages source.
@@ -75,6 +89,10 @@ superiority, state of the art, or broad transfer.
 See [`REPOSITORY_STRUCTURE.md`](REPOSITORY_STRUCTURE.md) for the complete map.
 
 ## Read and reproduce
+
+- Stability–Plasticity Control paper:
+  [`docs/data/Federico_Lolli_Stability_Plasticity_Control.pdf`](docs/data/Federico_Lolli_Stability_Plasticity_Control.pdf),
+  with its [research page](docs/projects/02-stability-plasticity/index.html).
 
 - Canonical technical report:
   [`research/paper/TECHNICAL_REPORT.md`](research/paper/TECHNICAL_REPORT.md).
@@ -91,6 +109,10 @@ See [`REPOSITORY_STRUCTURE.md`](REPOSITORY_STRUCTURE.md) for the complete map.
   [`research/limitations/PUBLICATION_READINESS_REPORT.md`](research/limitations/PUBLICATION_READINESS_REPORT.md).
 - Static site: `docs/index.html`; intended project URL:
   <https://xxlilloxx-cyber.github.io/federico-lolli-ai-research/>.
+- Project 01 website:
+  <https://xxlilloxx-cyber.github.io/federico-lolli-ai-research/projects/01-quadratic-gpt2/>.
+- Project 02 website:
+  <https://xxlilloxx-cyber.github.io/federico-lolli-ai-research/projects/02-stability-plasticity/>.
 
 Minimal validation from the repository root:
 
