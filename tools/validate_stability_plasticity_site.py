@@ -69,6 +69,9 @@ def main() -> None:
     assert "publications.html" in sitemap_text, "Publications missing from sitemap"
     assert "Sitemap: https://xxlilloxx-cyber.github.io/federico-lolli-ai-research/sitemap.xml" in robots_text, "robots.txt sitemap URL incorrect"
     for page in DOCS.rglob("*.html"):
+        if page.name.startswith("google"):
+            assert page.read_text(encoding="utf-8") == "google-site-verification: googlebe0deacc48ace60e.html"
+            continue
         text = page.read_text(encoding="utf-8")
         assert 'rel="canonical"' in text, f"canonical URL missing: {page}"
         assert 'name="robots"' in text, f"robots metadata missing: {page}"

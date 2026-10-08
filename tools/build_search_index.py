@@ -68,7 +68,8 @@ def add_metadata(path: Path) -> None:
 
 
 def build(lastmod: str) -> None:
-    pages = sorted(DOCS.rglob("*.html"))
+    # Search Console ownership files must remain byte-for-byte plain text.
+    pages = sorted(p for p in DOCS.rglob("*.html") if not p.name.startswith("google"))
     for page in pages:
         add_metadata(page)
     canonical_pages = [p.relative_to(DOCS).as_posix() for p in pages if p.relative_to(DOCS).as_posix() not in REDIRECTS]
