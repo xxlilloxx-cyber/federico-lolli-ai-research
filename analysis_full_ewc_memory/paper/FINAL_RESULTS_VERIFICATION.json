@@ -1,0 +1,220 @@
+{
+  "status": "valid",
+  "aggregate_calculation": "mean and sample SD (ddof=1) reproduced from canonical per-seed rows",
+  "confirmation_cells": 9,
+  "correlations": [
+    {
+      "method": "combined",
+      "x": "lambda",
+      "y": "mean_forgetting",
+      "pearson": -0.7357739523649567,
+      "spearman": -1.0,
+      "n": 7
+    },
+    {
+      "method": "combined",
+      "x": "lambda",
+      "y": "mean_new_fact_acquisition_nll",
+      "pearson": 0.8992128785070017,
+      "spearman": 1.0,
+      "n": 7
+    },
+    {
+      "method": "combined",
+      "x": "lambda",
+      "y": "parameter_displacement_a_c_l2",
+      "pearson": -0.976939474550798,
+      "spearman": -0.8928571428571429,
+      "n": 7
+    },
+    {
+      "method": "combined",
+      "x": "parameter_displacement_a_c_l2",
+      "y": "mean_forgetting",
+      "pearson": 0.7470730547079298,
+      "spearman": 0.8928571428571429,
+      "n": 7
+    },
+    {
+      "method": "combined",
+      "x": "realized_ewc_penalty_c",
+      "y": "mean_forgetting",
+      "pearson": -0.4043006803343095,
+      "spearman": -0.28571428571428575,
+      "n": 7
+    },
+    {
+      "method": "combined",
+      "x": "realized_ewc_penalty_c",
+      "y": "mean_new_fact_acquisition_nll",
+      "pearson": 0.028670267163944763,
+      "spearman": 0.28571428571428575,
+      "n": 7
+    },
+    {
+      "method": "lora",
+      "x": "lambda",
+      "y": "mean_forgetting",
+      "pearson": -0.6320885705953389,
+      "spearman": -1.0,
+      "n": 7
+    },
+    {
+      "method": "lora",
+      "x": "lambda",
+      "y": "mean_new_fact_acquisition_nll",
+      "pearson": 0.7717299156816047,
+      "spearman": 1.0,
+      "n": 7
+    },
+    {
+      "method": "lora",
+      "x": "lambda",
+      "y": "parameter_displacement_a_c_l2",
+      "pearson": -0.9478085723826843,
+      "spearman": -1.0,
+      "n": 7
+    },
+    {
+      "method": "lora",
+      "x": "parameter_displacement_a_c_l2",
+      "y": "mean_forgetting",
+      "pearson": 0.7872822828791806,
+      "spearman": 1.0,
+      "n": 7
+    },
+    {
+      "method": "lora",
+      "x": "realized_ewc_penalty_c",
+      "y": "mean_forgetting",
+      "pearson": -0.43906990385642397,
+      "spearman": -0.10714285714285716,
+      "n": 7
+    },
+    {
+      "method": "lora",
+      "x": "realized_ewc_penalty_c",
+      "y": "mean_new_fact_acquisition_nll",
+      "pearson": 0.1581272907497849,
+      "spearman": 0.10714285714285716,
+      "n": 7
+    },
+    {
+      "method": "symmetric",
+      "x": "lambda",
+      "y": "mean_forgetting",
+      "pearson": -0.7502340694601433,
+      "spearman": -1.0,
+      "n": 7
+    },
+    {
+      "method": "symmetric",
+      "x": "lambda",
+      "y": "mean_new_fact_acquisition_nll",
+      "pearson": 0.9267440526580538,
+      "spearman": 1.0,
+      "n": 7
+    },
+    {
+      "method": "symmetric",
+      "x": "lambda",
+      "y": "parameter_displacement_a_c_l2",
+      "pearson": -0.9914541965441805,
+      "spearman": -0.9642857142857145,
+      "n": 7
+    },
+    {
+      "method": "symmetric",
+      "x": "parameter_displacement_a_c_l2",
+      "y": "mean_forgetting",
+      "pearson": 0.6929572426998933,
+      "spearman": 0.9642857142857145,
+      "n": 7
+    },
+    {
+      "method": "symmetric",
+      "x": "realized_ewc_penalty_c",
+      "y": "mean_forgetting",
+      "pearson": -0.5506587244174762,
+      "spearman": -0.39285714285714296,
+      "n": 7
+    },
+    {
+      "method": "symmetric",
+      "x": "realized_ewc_penalty_c",
+      "y": "mean_new_fact_acquisition_nll",
+      "pearson": 0.19041819110478436,
+      "spearman": 0.39285714285714296,
+      "n": 7
+    }
+  ],
+  "configuration": {
+    "model": "gpt2",
+    "dataset_seed": 20261002,
+    "facts_per_set": 12,
+    "steps_per_phase": 2500,
+    "evaluation_every_steps": 250,
+    "sequence_length": 64,
+    "micro_batch_size": 4,
+    "gradient_accumulation": 1,
+    "effective_batch_size": 4,
+    "learning_rate": 0.0003,
+    "weight_decay": 0.0,
+    "gradient_clipping": 1.0,
+    "scheduler": "none",
+    "placement": "transformer.h[0].attn.c_proj",
+    "pairwise_slot_evaluation": false,
+    "amp": "fp16",
+    "ewc_lambda": 0.0,
+    "ewc_gamma": 1.0,
+    "fisher_samples": 12,
+    "fisher_batches": 12,
+    "device": "cuda",
+    "method": "lora",
+    "protocol": "ewc_like",
+    "seed": 42,
+    "dtype": "torch.float16",
+    "output_dir": "<repository-root>/results_ewc_lambda_sweep/lora_lambda_0_seed_42"
+  },
+  "figures": [
+    {
+      "figure": 1,
+      "path": "final_figures/figure_1_exploratory_stability_plasticity.png",
+      "sha256": "6e611dbfc855c3913b02f9c870d918d2e22ce87de06ccc9ae2d0b3416bee296a",
+      "bytes": 162975
+    },
+    {
+      "figure": 2,
+      "path": "final_figures/figure_2_confirmation_stability_plasticity.png",
+      "sha256": "442168c80c1d5eefd147b3ee6f1a10ba91ed9897802b0bc8d8c8d9e09a9cdc06",
+      "bytes": 165965
+    },
+    {
+      "figure": 3,
+      "path": "final_figures/figure_3_final_balanced_memory.png",
+      "sha256": "0947bc54edf651445ff52bb189a192b2c1e9686020560c2904bd1ca48fb0f0ad",
+      "bytes": 79926
+    },
+    {
+      "figure": 4,
+      "path": "final_figures/figure_4_forgetting_decomposition.png",
+      "sha256": "46fa62163ce0a4e63237c154d7ffd310c6eb941d98a761e3dd80d0a47881feae",
+      "bytes": 112093
+    },
+    {
+      "figure": 5,
+      "path": "final_figures/figure_5_plasticity_exact_generation.png",
+      "sha256": "cdf554b411000722bb43f0c81aff1da3f0fc69b3efc1e994b6a26f284caf134e",
+      "bytes": 146580
+    },
+    {
+      "figure": 6,
+      "path": "final_figures/figure_6_mechanistic_evidence.png",
+      "sha256": "64b45296300d1dabdeb4b5f86386dab03df5f37e879dd0c72394481bf2cc4313",
+      "bytes": 211846
+    }
+  ],
+  "references": 14,
+  "pdf_pages": 54,
+  "pdf_bytes": 1038089
+}

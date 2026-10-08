@@ -1,0 +1,39 @@
+{
+  "source_root": "results_ewc_lambda_sweep",
+  "runs": 21,
+  "methods": [
+    "lora",
+    "symmetric",
+    "combined"
+  ],
+  "lambdas": [
+    0.0,
+    1.0,
+    10.0,
+    30.0,
+    50.0,
+    100.0,
+    300.0
+  ],
+  "seed": 42,
+  "main_figures": [
+    "figure_1_stability_plasticity.svg",
+    "figure_2_forgetting.svg",
+    "figure_3_acquisition.svg",
+    "figure_4_final_memory.svg",
+    "figure_5_parameter_fisher.svg"
+  ],
+  "tables": [
+    "CROSS_METHOD_COMPARISON.csv",
+    "KNEE_ANALYSIS.csv",
+    "LAMBDA_30_50_COMPARISON.csv",
+    "PARETO_CANDIDATES.csv",
+    "candidate_lambdas.csv",
+    "correlations.csv",
+    "exact_match_thresholds.csv",
+    "lambda_full_metrics.csv",
+    "lambda_tradeoff.csv",
+    "lambda_vs_baseline.csv",
+    "pareto_candidates.csv"
+  ]
+}

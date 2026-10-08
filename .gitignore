@@ -25,6 +25,18 @@ results_multilayer/
 results_downstream_controlled/
 results_rank_factorial_controlled/
 results_rank_scaling_ablation/
+results_factual_learning/
+results_combined_extension/
+results_abc_memory/
+results_ewc_lambda_sweep/
+results_ewc_confirmation/
 *.pt
 *.pth
 *.ckpt
+*.log
+/analysis_full_ewc_memory/paper/submission_build*/
+/analysis_full_ewc_memory/paper/submission_render*/
+/analysis_full_ewc_memory/paper/final_figures/
+/PREPUBLICATION_GIT_STATUS.zlist
+/PREPUBLICATION_GIT_STATUS.txt
+/docs/assets/publication/Pasted image*.png

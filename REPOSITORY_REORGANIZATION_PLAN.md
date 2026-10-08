@@ -1,5 +1,21 @@
 # Repository Reorganization Plan
 
+## 2026-10-08 additive publication extension
+
+The Stability–Plasticity Control study is added as Project 02 without moving
+the established Project 01 tree or raw experimental directories. Its logical
+archive consists of the final manuscript and analysis under
+`analysis_full_ewc_memory/`, experiment code under
+`experiments/factual_learning_lora_symmetric/`, a stable paper index under
+`papers/stability-plasticity-control/`, and a static Pages presentation under
+`docs/projects/02-stability-plasticity/`.
+
+Publication selection is explicit. Source, configurations, tests, validated
+aggregate tables, provenance, reports, paper sources, PDF, and figures are
+archived. Checkpoints, raw result roots, logs, caches, render intermediates,
+virtual environments, and local review bundles remain local and ignored. This
+extension does not repeat the historical migration described below.
+
 **Project:** Symmetric Quadratic Adapter research  
 **Branch:** `public-release-preparation`  
 **Inventory baseline:** commit `6ca392a9a2d779e9dc587616d9e7905ec256c61f`  

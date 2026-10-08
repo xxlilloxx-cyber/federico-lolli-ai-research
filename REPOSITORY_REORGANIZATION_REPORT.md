@@ -1,5 +1,20 @@
 # Repository Reorganization Report
 
+## 2026-10-08 Project 02 publication update
+
+The archive now exposes two separate research projects through one static
+site. Project 01 retains every established URL and scientific result. Project
+02 adds the definitive 24-page Stability–Plasticity Control manuscript, seven
+canonical figures, validated aggregate evidence, experiment/analysis code,
+tests, and provenance. The public PDF is byte-identical to the validated
+`submission_build_final` artifact.
+
+The missing Project 01 architecture PDF and modified PNG found before release
+were restored byte-for-byte from the last committed publication. No raw
+checkpoint or large local training tree is part of the publication selection.
+The dedicated `gh-pages` branch remains the deployment payload; repository
+sources and reproducibility material are maintained on the source branch.
+
 **Date:** 2026-09-29  
 **Branch:** `public-release-preparation`  
 **Remote operations:** none

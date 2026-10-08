@@ -1,0 +1,7 @@
+method,lambda,mean_forgetting,mean_new_fact_acquisition_nll,final_mean_nll,final_mean_probability,final_mean_exact_match,rationale
+combined,10.0,3.3880359841407173,0.6869541020908704,2.6271670675939984,0.1829363245789619,0.027777777777777776,maximum endpoint-chord knee distance; non-zero final exact match; Pareto-nondominated
+combined,30.0,2.568973305117753,1.2213145590697725,2.378565425674121,0.12803446628318674,0.013888888888888888,minimum normalized distance to ideal; non-zero final exact match; Pareto-nondominated
+lora,1.0,3.9427143900926844,0.561384455523997,3.5077875540074377,0.21467139006561722,0.08333333333333333,non-zero final exact match; Pareto-nondominated
+lora,10.0,2.193541744309995,1.062811687278251,2.4909370173182754,0.15038250942342452,0.013888888888888888,minimum normalized distance to ideal; maximum endpoint-chord knee distance; non-zero final exact match; Pareto-nondominated
+symmetric,10.0,3.8738811354916027,0.3682137506063251,2.7072481497501335,0.24419411923934187,0.125,non-zero final exact match; Pareto-nondominated
+symmetric,30.0,2.753590820163178,0.9028184431760262,2.3001946128076978,0.15496316045318242,0.0,minimum normalized distance to ideal; maximum endpoint-chord knee distance; Pareto-nondominated
