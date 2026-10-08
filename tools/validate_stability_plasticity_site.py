@@ -58,6 +58,20 @@ def validate_local_links() -> None:
 
 
 def main() -> None:
+    sitemap = DOCS / "sitemap.xml"
+    robots = DOCS / "robots.txt"
+    assert sitemap.is_file(), "missing sitemap.xml"
+    assert robots.is_file(), "missing robots.txt"
+    sitemap_text = sitemap.read_text(encoding="utf-8")
+    robots_text = robots.read_text(encoding="utf-8")
+    assert "projects/01-quadratic-gpt2/" in sitemap_text, "Project 01 missing from sitemap"
+    assert "projects/02-stability-plasticity/" in sitemap_text, "Project 02 missing from sitemap"
+    assert "publications.html" in sitemap_text, "Publications missing from sitemap"
+    assert "Sitemap: https://xxlilloxx-cyber.github.io/federico-lolli-ai-research/sitemap.xml" in robots_text, "robots.txt sitemap URL incorrect"
+    for page in DOCS.rglob("*.html"):
+        text = page.read_text(encoding="utf-8")
+        assert 'rel="canonical"' in text, f"canonical URL missing: {page}"
+        assert 'name="robots"' in text, f"robots metadata missing: {page}"
     assert PAGE.is_file()
     text = PAGE.read_text(encoding="utf-8")
     for required in (

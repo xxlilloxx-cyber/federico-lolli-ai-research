@@ -7,6 +7,8 @@ import html
 import shutil
 from pathlib import Path
 
+from build_search_index import build as build_search_index
+
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
 PROJECT = DOCS / "projects" / "02-stability-plasticity"
@@ -186,6 +188,7 @@ def build_stability_plasticity_site() -> None:
     (DOCS / "index.html").write_text(home_page() + "\n", encoding="utf-8")
     (DOCS / "research" / "index.html").write_text(research_page() + "\n", encoding="utf-8")
     (DOCS / "publications.html").write_text(publications_page() + "\n", encoding="utf-8")
+    build_search_index(__import__("datetime").date.today().isoformat())
     print("built Stability–Plasticity Control page, archive navigation, and public assets")
 
 
