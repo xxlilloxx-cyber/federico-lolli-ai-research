@@ -11,6 +11,7 @@ from urllib.parse import urljoin
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
 SITE = "https://xxlilloxx-cyber.github.io/federico-lolli-ai-research/"
+GOOGLE_SITE_VERIFICATION = "j6djlVcgGzkDEmS45LzIh5mmJNZmprijUGcxbeKM5AA"
 REDIRECTS = {
     "projects/01-quadratic-gpt2/formulation.html": "projects/01-quadratic-gpt2/method.html",
     "projects/01-quadratic-gpt2/methods.html": "projects/01-quadratic-gpt2/experiments.html",
@@ -45,6 +46,7 @@ def add_metadata(path: Path) -> None:
         r'<meta\s+name="robots"\s+content="[^"]*"\s*/?>',
         r'<meta\s+property="og:[^"]+"\s+content="[^"]*"\s*/?>',
         r'<meta\s+name="twitter:card"\s+content="[^"]*"\s*/?>',
+        r'<meta\s+name="google-site-verification"\s+content="[^"]*"\s*/?>',
     )
     for pattern in patterns:
         text = re.sub(pattern, "", text, flags=re.I)
@@ -57,6 +59,8 @@ def add_metadata(path: Path) -> None:
         f'<meta property="og:url" content="{html.escape(canonical, quote=True)}">'
         '<meta name="twitter:card" content="summary">'
     )
+    if relative == "index.html":
+        metadata += f'<meta name="google-site-verification" content="{GOOGLE_SITE_VERIFICATION}">'
     marker = "</head>" if "</head>" in text else "<title>"
     if marker == "</head>":
         text = text.replace(marker, metadata + marker, 1)
