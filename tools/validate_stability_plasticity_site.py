@@ -75,6 +75,9 @@ def main() -> None:
         text = page.read_text(encoding="utf-8")
         assert 'rel="canonical"' in text, f"canonical URL missing: {page}"
         assert 'name="robots"' in text, f"robots metadata missing: {page}"
+    home_text = (DOCS / "index.html").read_text(encoding="utf-8")
+    assert '<meta name="google-site-verification" content="j6djlVcgGzkDEmS45LzIh5mmJNZmprijUGcxbeKM5AA">' in home_text
+    assert home_text.index('name="google-site-verification"') < home_text.index("<body>")
     assert PAGE.is_file()
     text = PAGE.read_text(encoding="utf-8")
     for required in (
